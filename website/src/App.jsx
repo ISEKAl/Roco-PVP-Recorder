@@ -14,7 +14,9 @@ import {
   Space,
   Tag,
   Popconfirm,
-  Tabs
+  Tabs,
+  Slider,
+  Tooltip
 } from 'antd';
 import { 
   SaveOutlined, 
@@ -22,7 +24,8 @@ import {
   PlusOutlined, 
   ArrowLeftOutlined,
   ArrowRightOutlined,
-  DownloadOutlined
+  DownloadOutlined,
+  MinusOutlined
 } from '@ant-design/icons';
 import pokemonData from './config/pokemon.json';
 import skillsData from './config/skills.json';
@@ -32,6 +35,373 @@ const { Title, Text } = Typography;
 const { Option } = Select;
 const { Header, Content } = Layout;
 const { TabPane } = Tabs;
+
+const PetDetailCard = ({ 
+  pet, 
+  petIndex,
+  playerKey, 
+  playerNum, 
+  isActive, 
+  onSetActive, 
+  onUpdatePet, 
+  bgColor, 
+  borderColor 
+}) => {
+  return (
+    <Card 
+      key={pet.name}
+      size="small" 
+      title={
+        <div 
+          style={{ 
+            cursor: 'pointer',
+            margin: '-8px -16px',
+            padding: '8px 16px'
+          }}
+          onClick={() => onSetActive(playerKey, pet.name)}
+        >
+          {pet.name}
+          {isActive && (
+            <Tag color={playerNum === 1 ? 'blue' : 'orange'} style={{ marginLeft: '8px', fontSize: '12px' }}>
+              当前
+            </Tag>
+          )}
+        </div>
+      }
+      hoverable
+      style={{ 
+        marginBottom: '12px', 
+        background: isActive ? bgColor : '#fff',
+        borderLeft: isActive ? `4px solid ${borderColor}` : '1px solid #d9d9d9',
+        cursor: 'default'
+      }}
+    >
+      <Row gutter={8} align="middle" style={{ marginBottom: 12 }}>
+        <Col span={3}>
+          <Text strong>HP:</Text>
+        </Col>
+        <Col span={12}>
+          <Slider
+            min={0}
+            max={1}
+            step={0.05}
+            value={pet.hp_ratio}
+            onChange={(val) => onUpdatePet(playerKey, petIndex, 'hp_ratio', val)}
+            tooltip={{
+              formatter: (value) => (
+                <div style={{ fontSize: '18px', fontWeight: 'bold', padding: '4px 8px' }}>
+                  {value}
+                </div>
+              )
+            }}
+          />
+        </Col>
+        <Col span={5}>
+          <NumberInput
+            value={pet.hp_ratio}
+            onChange={(val) => onUpdatePet(playerKey, petIndex, 'hp_ratio', val)}
+            min={0}
+            max={1}
+            step={0.05}
+            precision={2}
+            width={110}
+          />
+        </Col>
+      </Row>
+      <Row gutter={8} align="middle">
+        <Col span={3}>
+          <Text strong>能量:</Text>
+        </Col>
+        <Col span={12}>
+          <EnergyBlocks 
+            value={pet.mp}
+            onChange={(val) => onUpdatePet(playerKey, petIndex, 'mp', val)}
+            playerNum={playerNum}
+          />
+        </Col>
+        <Col span={5}>
+          <NumberInput 
+            value={pet.mp}
+            onChange={(val) => onUpdatePet(playerKey, petIndex, 'mp', val)}
+            min={0}
+            max={10}
+            width={110}
+          />
+        </Col>
+      </Row>
+    </Card>
+  );
+};
+
+const BenchPetButton = ({ 
+  pet, 
+  petIndex, 
+  playerKey, 
+  playerNum, 
+  onSetActive, 
+  onUpdatePet, 
+  bgColor, 
+  borderColor 
+}) => {
+  const [showPopup, setShowPopup] = useState(false);
+  const buttonRef = React.useRef(null);
+  
+  return (
+    <div style={{ position: 'relative', display: 'inline-block' }} ref={buttonRef}>
+      <Button
+        onClick={() => onSetActive(playerKey, pet.name)}
+        onMouseEnter={() => setShowPopup(true)}
+        onMouseLeave={() => setShowPopup(false)}
+        style={{ 
+          marginRight: '8px', 
+          marginBottom: '8px',
+          borderColor: borderColor,
+          color: playerNum === 1 ? '#1890ff' : '#fa8c16'
+        }}
+      >
+        {pet.name}
+      </Button>
+      
+      {showPopup && (
+        <div 
+          style={{
+            position: 'absolute',
+            top: '80%',
+            left: '0',
+            zIndex: 1000,
+            paddingTop: '20px',
+            paddingBottom: '20px'
+          }}
+          onMouseEnter={() => setShowPopup(true)}
+          onMouseLeave={() => setShowPopup(false)}
+        >
+          <Card 
+            size="small" 
+            title={
+              <div 
+                style={{ 
+                  cursor: 'pointer',
+                  margin: '-8px -16px',
+                  padding: '8px 16px'
+                }}
+                onClick={() => onSetActive(playerKey, pet.name)}
+              >
+                {pet.name}
+              </div>
+            }
+            style={{ 
+              width: '550px',
+              borderLeft: `4px solid ${borderColor}`,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+            }}
+          >
+            <Row gutter={8} align="middle" style={{ marginBottom: 12 }}>
+              <Col span={3}>
+                <Text strong>HP:</Text>
+              </Col>
+              <Col span={12}>
+                <Slider
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={pet.hp_ratio}
+                  onChange={(val) => onUpdatePet(playerKey, petIndex, 'hp_ratio', val)}
+                  tooltip={{
+                    formatter: (value) => (
+                      <div style={{ fontSize: '18px', fontWeight: 'bold', padding: '4px 8px' }}>
+                        {value}
+                      </div>
+                    )
+                  }}
+                />
+              </Col>
+              <Col span={5}>
+                <NumberInput
+                  value={pet.hp_ratio}
+                  onChange={(val) => onUpdatePet(playerKey, petIndex, 'hp_ratio', val)}
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  precision={2}
+                  width={110}
+                />
+              </Col>
+            </Row>
+            <Row gutter={8} align="middle">
+              <Col span={3}>
+                <Text strong>能量:</Text>
+              </Col>
+              <Col span={12}>
+                <EnergyBlocks 
+                  value={pet.mp}
+                  onChange={(val) => onUpdatePet(playerKey, petIndex, 'mp', val)}
+                  playerNum={playerNum}
+                />
+              </Col>
+              <Col span={5}>
+                <NumberInput 
+                  value={pet.mp}
+                  onChange={(val) => onUpdatePet(playerKey, petIndex, 'mp', val)}
+                  min={0}
+                  max={10}
+                  width={110}
+                />
+              </Col>
+            </Row>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const NumberInput = ({ value, onChange, min = 0, max = 100, step = 1, precision, width = 120 }) => {
+  const displayValue = precision !== undefined ? value.toFixed(precision) : value;
+  
+  return (
+    <div style={{ 
+      display: 'inline-flex',
+      alignItems: 'center',
+      border: '1px solid #d9d9d9',
+      borderRadius: '6px',
+      overflow: 'hidden',
+      width: width
+    }}>
+      <Button 
+        type="text"
+        icon={<MinusOutlined />} 
+        disabled={value <= min}
+        onClick={() => onChange(Math.max(min, value - step))}
+        style={{ 
+          border: 'none', 
+          borderRadius: 0, 
+          borderRight: '1px solid #d9d9d9',
+          height: '32px',
+          width: '36px'
+        }}
+      />
+      <div style={{ 
+        flex: 1,
+        textAlign: 'center', 
+        fontSize: '15px', 
+        fontWeight: 'bold',
+        lineHeight: '32px',
+        background: '#fff'
+      }}>
+        {displayValue}
+      </div>
+      <Button 
+        type="text"
+        icon={<PlusOutlined />} 
+        disabled={value >= max}
+        onClick={() => onChange(Math.min(max, value + step))}
+        style={{ 
+          border: 'none', 
+          borderRadius: 0, 
+          borderLeft: '1px solid #d9d9d9',
+          height: '32px',
+          width: '36px'
+        }}
+      />
+    </div>
+  );
+};
+
+const EnergyBlocks = ({ value, onChange, playerNum }) => {
+  const [hoverMp, setHoverMp] = useState(null);
+  const containerRef = React.useRef(null);
+  
+  const handleMouseMove = (e) => {
+    const container = containerRef.current;
+    if (!container) return;
+    
+    const rect = container.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const blockWidth = 24;
+    let index = Math.min(Math.floor(x / blockWidth), 9);
+    
+    // 检查是否在容器内
+    if (x >= 0 && x <= 10 * blockWidth) {
+      setHoverMp(index);
+    } else {
+      setHoverMp(null);
+    }
+  };
+  
+  const handleClick = (e) => {
+    const container = containerRef.current;
+    if (!container) return;
+    
+    const rect = container.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const blockWidth = 24;
+    const index = Math.min(Math.floor(x / blockWidth), 9);
+    onChange(index + 1);
+  };
+  
+  const handleDoubleClick = () => {
+    onChange(0);
+  };
+  
+  return (
+    <div 
+      ref={containerRef}
+      style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        padding: '2px 0',
+        width: '240px'
+      }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => setHoverMp(null)}
+      onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
+    >
+      {[...Array(10)].map((_, i) => {
+        const isActive = i < value;
+        const isHovered = hoverMp !== null && i <= hoverMp;
+        return (
+          <div
+            key={i}
+            style={{
+              width: '24px',
+              height: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}
+          >
+            <Tooltip 
+              title={
+                <div style={{ fontSize: '18px', fontWeight: 'bold', padding: '4px 8px' }}>
+                  {i + 1}
+                </div>
+              } 
+              open={hoverMp === i}
+            >
+              <div
+                style={{
+                  width: '20px',
+                  height: '20px',
+                  border: '1px solid #d9d9d9',
+                  borderRadius: '2px',
+                  cursor: 'pointer',
+                  backgroundColor: isHovered 
+                    ? (playerNum === 1 ? '#91caff' : '#ffd591')
+                    : (isActive 
+                        ? (playerNum === 1 ? '#1890ff' : '#fa8c16') 
+                        : '#fff'),
+                  transition: 'background-color 0.1s'
+                }}
+              />
+            </Tooltip>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 const DEFAULT_PET_STATE = (name) => ({
   name,
@@ -188,7 +558,16 @@ const App = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `battle_${Date.now()}.json`;
+    
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    a.download = `battle_${year}-${month}-${day}_${hours}-${minutes}-${seconds}.json`;
+    
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -203,9 +582,17 @@ const App = () => {
     const round = rounds[currentRoundIndex];
     const playerState = round[playerKey];
     const bgColor = playerNum === 1 ? '#e6f7ff' : '#fff7e6';
+    const borderColor = playerNum === 1 ? '#1890ff' : '#fa8c16';
 
     return (
-      <Card type="inner" title={`玩家 ${playerNum}`} style={{ marginBottom: '16px' }}>
+      <Card 
+        type="inner" 
+        title={`玩家 ${playerNum}`} 
+        style={{ 
+          marginBottom: '16px',
+          borderTop: `3px solid ${borderColor}`
+        }}
+      >
         <Form.Item label="场上精灵">
           <Select 
             value={playerState.active_pet}
@@ -215,57 +602,72 @@ const App = () => {
             {team.map(name => <Option key={name} value={name}>{name}</Option>)}
           </Select>
         </Form.Item>
-
         <Divider orientation="left">精灵状态</Divider>
-        {playerState.pets.map((pet, idx) => (
-          <Card 
-            key={pet.name}
-            size="small" 
-            title={pet.name} 
-            style={{ 
-              marginBottom: '8px', 
-              background: pet.name === playerState.active_pet ? bgColor : '#fff',
-              borderLeft: pet.name === playerState.active_pet ? '4px solid #1890ff' : '1px solid #d9d9d9'
-            }}
-          >
-            <Space size="middle" wrap>
-              <Text strong>HP:</Text>
-              <InputNumber 
-                min={0} 
-                max={1} 
-                step={0.05}
-                precision={2}
-                value={pet.hp_ratio}
-                onChange={(val) => updatePetState(playerKey, idx, 'hp_ratio', val)}
-              />
-              <Text strong>能量:</Text>
-              <InputNumber 
-                min={0} 
-                max={10}
-                value={pet.mp}
-                onChange={(val) => updatePetState(playerKey, idx, 'mp', val)}
-              />
-            </Space>
-          </Card>
-        ))}
+        
+        {/* 在场精灵 - 完整卡片 */}
+        {playerState.pets.filter(pet => pet.name === playerState.active_pet).map((pet, idx) => {
+          const originalIndex = playerState.pets.findIndex(p => p.name === pet.name);
+          return (
+            <PetDetailCard
+              key={pet.name}
+              pet={pet}
+              petIndex={originalIndex}
+              playerKey={playerKey}
+              playerNum={playerNum}
+              isActive={true}
+              onSetActive={updateActivePet}
+              onUpdatePet={updatePetState}
+              bgColor={bgColor}
+              borderColor={borderColor}
+            />
+          );
+        })}
+        
+        {/* 替补精灵 - 排成一排的按钮 */}
+        {playerState.pets.filter(pet => pet.name !== playerState.active_pet).length > 0 && (
+          <>
+            <Divider orientation="left" style={{ fontSize: '13px', margin: '12px 0' }}>替补精灵</Divider>
+            <div style={{ marginBottom: '8px' }}>
+              {playerState.pets.filter(pet => pet.name !== playerState.active_pet).map((pet, idx) => {
+                const originalIndex = playerState.pets.findIndex(p => p.name === pet.name);
+                return (
+                  <BenchPetButton
+                    key={pet.name}
+                    pet={pet}
+                    petIndex={originalIndex}
+                    playerKey={playerKey}
+                    playerNum={playerNum}
+                    onSetActive={updateActivePet}
+                    onUpdatePet={updatePetState}
+                    bgColor={bgColor}
+                    borderColor={borderColor}
+                  />
+                );
+              })}
+            </div>
+          </>
+        )}
 
         <Divider orientation="left">增益减益</Divider>
-        <Space size="small" wrap>
+        <Row gutter={[12, 8]}>
           {buffsConfig.map(buffItem => (
-            <React.Fragment key={buffItem.key}>
-              <Text>{buffItem.label}:</Text>
-              <InputNumber 
-                min={buffItem.min}
-                max={buffItem.max}
-                value={playerState.buff[buffItem.key] ?? buffItem.default}
-                onChange={(val) => updateBuff(playerKey, buffItem.key, val)}
-              />
-            </React.Fragment>
+            <Col span={12} key={buffItem.key}>
+              <Space>
+                <Text>{buffItem.label}:</Text>
+                <NumberInput 
+                  min={buffItem.min}
+                  max={buffItem.max}
+                  value={playerState.buff[buffItem.key] ?? buffItem.default}
+                  onChange={(val) => updateBuff(playerKey, buffItem.key, val)}
+                  width={120}
+                />
+              </Space>
+            </Col>
           ))}
-        </Space>
+        </Row>
 
         <Divider orientation="left">行动</Divider>
-        <Space direction="vertical" style={{ width: '100%' }}>
+        <Space direction="vertical" style={{ width: '100%' }} size="middle">
           <Select 
             placeholder="选择行动类型"
             value={playerState.action?.type}
@@ -312,15 +714,30 @@ const App = () => {
 
   return (
     <Layout style={{ minHeight: '100vh', background: '#f0f2f5' }}>
-      <Header style={{ background: '#fff', padding: '0 24px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+      <Header style={{ 
+        background: '#fff', 
+        padding: '0 24px', 
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 100
+      }}>
         <Title level={3} style={{ margin: 0, lineHeight: '64px' }}>
-          🎮 洛克王国PVP对局录入系统
+          🎮 洛克王国PVP对局录入工具
         </Title>
       </Header>
       
       <Content style={{ padding: '24px' }}>
         <Form form={form} layout="vertical">
-          <Card title="📋 基本信息" style={{ marginBottom: '16px' }}>
+          <Card 
+            title="📋 基本信息" 
+            extra={
+              <Button type="primary" icon={<DownloadOutlined />} onClick={exportJSON}>
+                导出 JSON
+              </Button>
+            }
+            style={{ marginBottom: '16px' }}
+          >
             <Row gutter={16}>
               <Col span={8}>
                 <Form.Item label="胜利方">
@@ -374,12 +791,7 @@ const App = () => {
           </Card>
 
           <Card 
-            title={
-              <Space>
-                <Text strong>🎯 第 {currentRound.cur_round} 回合</Text>
-                <Tag color="blue">{currentRoundIndex + 1} / {rounds.length}</Tag>
-              </Space>
-            }
+            title="🎯 回合详情"
             extra={
               <Space>
                 <Button 
@@ -409,6 +821,17 @@ const App = () => {
             }
             style={{ marginBottom: '16px' }}
           >
+            <Tabs 
+              activeKey={String(currentRoundIndex)} 
+              onChange={(key) => setCurrentRoundIndex(Number(key))}
+              type="card"
+              size="small"
+              items={rounds.map((round, idx) => ({
+                key: String(idx),
+                label: `第 ${round.cur_round} 回合`,
+              }))}
+              style={{ marginBottom: '16px' }}
+            />
             <Row gutter={32}>
               <Col span={12}>
                 {renderPlayerCard(1)}
@@ -418,17 +841,6 @@ const App = () => {
               </Col>
             </Row>
           </Card>
-
-          <div style={{ textAlign: 'center', marginTop: '24px' }}>
-            <Button 
-              type="primary" 
-              size="large" 
-              icon={<DownloadOutlined />} 
-              onClick={exportJSON}
-            >
-              导出 JSON
-            </Button>
-          </div>
         </Form>
       </Content>
     </Layout>
