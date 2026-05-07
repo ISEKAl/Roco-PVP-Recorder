@@ -1,0 +1,113 @@
+{
+    "time": "2025-12-19T07:38:45",
+    "winner": 1,
+    "total_round": 2,
+    "team_1": [
+        "迪莫",
+        "火神",
+        "奇丽花",
+        "绒光优优",
+        "画间陈铁兽",
+        "雪影娃娃"
+    ],
+    "team_2": [
+        "魔力喵",
+        "水蓝蓝",
+        "帕尔萨斯",
+        "翼王",
+        "岚鸟",
+        "奇丽花"
+    ],
+    "round": [
+        {
+            "cur_round": 1,
+            "player_1": {
+                "active_pet": "迪莫",
+                "pets": [
+                    { "name": "迪莫", "hp_ratio": 1, "mp": 10 },
+                    { "name": "火神", "hp_ratio": 1, "mp": 10 },
+                    { "name": "奇丽花", "hp_ratio": 1, "mp": 10 },
+                    { "name": "绒光优优", "hp_ratio": 1, "mp": 10 },
+                    { "name": "画间陈铁兽", "hp_ratio": 1, "mp": 10 },
+                    { "name": "雪影娃娃", "hp_ratio": 1, "mp": 10 }
+                ],
+                "buff": {
+                    "attack": 10,
+                    "sp_attack": 0,
+                    "defense": -10,
+                    "sp_defense": 0
+                },
+                "action": {
+                    "type": "skill",
+                    "skill_name": "光芒冲击"
+                }
+            },
+            "player_2": {
+                "active_pet": "魔力喵",
+                "pets": [
+                    { "name": "魔力喵", "hp_ratio": 0.85, "mp": 10 },
+                    { "name": "水蓝蓝", "hp_ratio": 1, "mp": 10 },
+                    { "name": "帕尔萨斯", "hp_ratio": 1, "mp": 10 },
+                    { "name": "翼王", "hp_ratio": 1, "mp": 10 },
+                    { "name": "岚鸟", "hp_ratio": 1, "mp": 10 },
+                    { "name": "奇丽花", "hp_ratio": 1, "mp": 10 }
+                ],
+                "buff": {
+                    "attack": 0,
+                    "sp_attack": 0,
+                    "defense": 0,
+                    "sp_defense": 0
+                },
+                "action": {
+                    "type": "skill",
+                    "skill_name": "抓挠"
+                }
+            }
+        },
+        {
+            "cur_round": 2,
+            "player_1": {
+                "active_pet": "迪莫",
+                "pets": [
+                    { "name": "迪莫", "hp_ratio": 0.9, "mp": 8 },
+                    { "name": "火神", "hp_ratio": 1, "mp": 10 },
+                    { "name": "奇丽花", "hp_ratio": 1, "mp": 10 },
+                    { "name": "绒光优优", "hp_ratio": 1, "mp": 10 },
+                    { "name": "画间陈铁兽", "hp_ratio": 1, "mp": 10 },
+                    { "name": "雪影娃娃", "hp_ratio": 1, "mp": 10 }
+                ],
+                "buff": {
+                    "attack": 10,
+                    "sp_attack": 0,
+                    "defense": -10,
+                    "sp_defense": 0
+                },
+                "action": {
+                    "type": "switch",
+                    "to": "火神"
+                }
+            },
+            "player_2": {
+                "active_pet": "魔力喵",
+                "pets": [
+                    { "name": "魔力喵", "hp_ratio": 0.6, "mp": 5 },
+                    { "name": "水蓝蓝", "hp_ratio": 1, "mp": 10 },
+                    { "name": "帕尔萨斯", "hp_ratio": 1, "mp": 10 },
+                    { "name": "翼王", "hp_ratio": 1, "mp": 10 },
+                    { "name": "岚鸟", "hp_ratio": 1, "mp": 10 },
+                    { "name": "奇丽花", "hp_ratio": 1, "mp": 10 }
+                ],
+                "buff": {
+                    "attack": 0,
+                    "sp_attack": 0,
+                    "defense": 0,
+                    "sp_defense": 0
+                },
+                "action": {
+                    "type": "skill",
+                    "skill_name": "飞叶快刀"
+                }
+            }
+        }
+    ]
+}

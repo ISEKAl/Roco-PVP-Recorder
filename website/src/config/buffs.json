@@ -1,0 +1,37 @@
+[
+  {
+    "key": "attack",
+    "label": "物攻",
+    "min": -100,
+    "max": 100,
+    "default": 0
+  },
+  {
+    "key": "sp_attack",
+    "label": "特攻",
+    "min": -100,
+    "max": 100,
+    "default": 0
+  },
+  {
+    "key": "defense",
+    "label": "物防",
+    "min": -100,
+    "max": 100,
+    "default": 0
+  },
+  {
+    "key": "sp_defense",
+    "label": "特防",
+    "min": -100,
+    "max": 100,
+    "default": 0
+  },
+  {
+    "key": "speed",
+    "label": "速度",
+    "min": -100,
+    "max": 100,
+    "default": 0
+  }
+]
