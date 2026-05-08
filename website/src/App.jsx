@@ -8,7 +8,6 @@ import {
   Form, 
   Row, 
   Col, 
-  Divider,
   Typography,
   message,
   Space,
@@ -25,7 +24,9 @@ import {
   ArrowLeftOutlined,
   ArrowRightOutlined,
   DownloadOutlined,
-  MinusOutlined
+  MinusOutlined,
+  DoubleLeftOutlined,
+  DoubleRightOutlined
 } from '@ant-design/icons';
 import pokemonData from './config/pokemon.json';
 import skillsData from './config/skills.json';
@@ -56,13 +57,15 @@ const PetDetailCard = ({
           style={{ 
             cursor: 'pointer',
             margin: '-8px -16px',
-            padding: '8px 16px'
+            padding: '8px 16px',
+            fontSize: '14px',
+            fontWeight: 500
           }}
           onClick={() => onSetActive(playerKey, pet.name)}
         >
           {pet.name}
           {isActive && (
-            <Tag color={playerNum === 1 ? 'blue' : 'orange'} style={{ marginLeft: '8px', fontSize: '12px' }}>
+            <Tag color={playerNum === 1 ? 'blue' : 'orange'} style={{ marginLeft: '8px' }}>
               当前
             </Tag>
           )}
@@ -78,7 +81,7 @@ const PetDetailCard = ({
     >
       <Row gutter={8} align="middle" style={{ marginBottom: 12 }}>
         <Col span={3}>
-          <Text strong>HP:</Text>
+          <Text strong type="secondary" style={{ fontSize: '13px' }}>HP</Text>
         </Col>
         <Col span={12}>
           <Slider
@@ -110,7 +113,7 @@ const PetDetailCard = ({
       </Row>
       <Row gutter={8} align="middle">
         <Col span={3}>
-          <Text strong>能量:</Text>
+          <Text strong type="secondary" style={{ fontSize: '13px' }}>能量</Text>
         </Col>
         <Col span={12}>
           <EnergyBlocks 
@@ -182,7 +185,9 @@ const BenchPetButton = ({
                 style={{ 
                   cursor: 'pointer',
                   margin: '-8px -16px',
-                  padding: '8px 16px'
+                  padding: '8px 16px',
+                  fontSize: '14px',
+                  fontWeight: 500
                 }}
                 onClick={() => onSetActive(playerKey, pet.name)}
               >
@@ -197,7 +202,7 @@ const BenchPetButton = ({
           >
             <Row gutter={8} align="middle" style={{ marginBottom: 12 }}>
               <Col span={3}>
-                <Text strong>HP:</Text>
+                <Text strong type="secondary" style={{ fontSize: '13px' }}>HP</Text>
               </Col>
               <Col span={12}>
                 <Slider
@@ -223,13 +228,15 @@ const BenchPetButton = ({
                   max={1}
                   step={0.05}
                   precision={2}
-                  width={110}
+                  width={160}
+                  showClear={false}
+                  showStep10={false}
                 />
               </Col>
             </Row>
             <Row gutter={8} align="middle">
               <Col span={3}>
-                <Text strong>能量:</Text>
+                <Text strong type="secondary" style={{ fontSize: '13px' }}>能量</Text>
               </Col>
               <Col span={12}>
                 <EnergyBlocks 
@@ -244,7 +251,9 @@ const BenchPetButton = ({
                   onChange={(val) => onUpdatePet(playerKey, petIndex, 'mp', val)}
                   min={0}
                   max={10}
-                  width={110}
+                  width={160}
+                  showClear={false}
+                  showStep10={false}
                 />
               </Col>
             </Row>
@@ -255,55 +264,55 @@ const BenchPetButton = ({
   );
 };
 
-const NumberInput = ({ value, onChange, min = 0, max = 100, step = 1, precision, width = 120 }) => {
+const NumberInput = ({ value, onChange, min = 0, max = 100, step = 1, precision, width = 320, showClear = false, showStep10 = false }) => {
   const displayValue = precision !== undefined ? value.toFixed(precision) : value;
   
   return (
-    <div style={{ 
-      display: 'inline-flex',
-      alignItems: 'center',
-      border: '1px solid #d9d9d9',
-      borderRadius: '6px',
-      overflow: 'hidden',
-      width: width
-    }}>
+    <Space.Compact style={{ width: width }}>
+      {showStep10 && (
+        <Button 
+          icon={<DoubleLeftOutlined />}
+          disabled={value - 10 < min}
+          onClick={() => onChange(Math.max(min, value - 10))}
+        />
+      )}
       <Button 
-        type="text"
         icon={<MinusOutlined />} 
         disabled={value <= min}
         onClick={() => onChange(Math.max(min, value - step))}
-        style={{ 
-          border: 'none', 
-          borderRadius: 0, 
-          borderRight: '1px solid #d9d9d9',
-          height: '32px',
-          width: '36px'
-        }}
       />
-      <div style={{ 
-        flex: 1,
-        textAlign: 'center', 
-        fontSize: '15px', 
-        fontWeight: 'bold',
-        lineHeight: '32px',
-        background: '#fff'
-      }}>
-        {displayValue}
-      </div>
+      <InputNumber 
+        value={value}
+        onChange={onChange}
+        min={min}
+        max={max}
+        step={step}
+        precision={precision}
+        style={{ width: '80px', textAlign: 'center' }}
+        controls={false}
+      />
       <Button 
-        type="text"
         icon={<PlusOutlined />} 
         disabled={value >= max}
         onClick={() => onChange(Math.min(max, value + step))}
-        style={{ 
-          border: 'none', 
-          borderRadius: 0, 
-          borderLeft: '1px solid #d9d9d9',
-          height: '32px',
-          width: '36px'
-        }}
       />
-    </div>
+      {showStep10 && (
+        <Button 
+          icon={<DoubleRightOutlined />}
+          disabled={value + 10 > max}
+          onClick={() => onChange(Math.min(max, value + 10))}
+        />
+      )}
+      {showClear && (
+        <Button 
+          danger
+          disabled={value === 0}
+          onClick={() => onChange(0)}
+        >
+          清空
+        </Button>
+      )}
+    </Space.Compact>
   );
 };
 
@@ -468,16 +477,29 @@ const App = () => {
 
   const addRound = () => {
     const prevRound = rounds[rounds.length - 1];
+    
+    // 确定玩家1的新场上精灵：如果上一回合行动是更换精灵，则使用更换的精灵，否则保持原样
+    let player1ActivePet = prevRound.player_1.active_pet;
+    if (prevRound.player_1.action?.type === 'switch' && prevRound.player_1.action.to) {
+      player1ActivePet = prevRound.player_1.action.to;
+    }
+    
+    // 确定玩家2的新场上精灵：如果上一回合行动是更换精灵，则使用更换的精灵，否则保持原样
+    let player2ActivePet = prevRound.player_2.active_pet;
+    if (prevRound.player_2.action?.type === 'switch' && prevRound.player_2.action.to) {
+      player2ActivePet = prevRound.player_2.action.to;
+    }
+    
     const newRound = {
       cur_round: prevRound.cur_round + 1,
       player_1: {
-        active_pet: prevRound.player_1.active_pet,
+        active_pet: player1ActivePet,
         pets: prevRound.player_1.pets.map(p => ({...p})),
         buff: {...prevRound.player_1.buff},
         action: null
       },
       player_2: {
-        active_pet: prevRound.player_2.active_pet,
+        active_pet: player2ActivePet,
         pets: prevRound.player_2.pets.map(p => ({...p})),
         buff: {...prevRound.player_2.buff},
         action: null
@@ -520,6 +542,17 @@ const App = () => {
     const newRounds = [...rounds];
     newRounds[currentRoundIndex][playerKey].buff[field] = value;
     setRounds(newRounds);
+  };
+
+  const clearAllBuffs = (playerKey) => {
+    const newRounds = [...rounds];
+    const newBuff = {};
+    buffsConfig.forEach(item => {
+      newBuff[item.key] = item.default;
+    });
+    newRounds[currentRoundIndex][playerKey].buff = newBuff;
+    setRounds(newRounds);
+    message.success('增益减益已清空！');
   };
 
   const updateAction = (playerKey, action) => {
@@ -587,13 +620,13 @@ const App = () => {
     return (
       <Card 
         type="inner" 
-        title={`玩家 ${playerNum}`} 
+        title={<Text strong style={{ fontSize: '15px', color: borderColor }}>玩家 {playerNum}</Text>}
         style={{ 
           marginBottom: '16px',
           borderTop: `3px solid ${borderColor}`
         }}
       >
-        <Form.Item label="场上精灵">
+        <Form.Item label={<Text strong style={{ fontSize: '13px' }}>场上精灵</Text>} style={{ marginBottom: 12 }}>
           <Select 
             value={playerState.active_pet}
             onChange={(val) => updateActivePet(playerKey, val)}
@@ -602,7 +635,9 @@ const App = () => {
             {team.map(name => <Option key={name} value={name}>{name}</Option>)}
           </Select>
         </Form.Item>
-        <Divider orientation="left">精灵状态</Divider>
+        <div style={{ marginBottom: 16, fontSize: '13px', fontWeight: 500, color: 'rgba(0,0,0,0.88)' }}>
+          <Text strong style={{ fontSize: '13px' }}>精灵状态</Text>
+        </div>
         
         {/* 在场精灵 - 完整卡片 */}
         {playerState.pets.filter(pet => pet.name === playerState.active_pet).map((pet, idx) => {
@@ -626,7 +661,9 @@ const App = () => {
         {/* 替补精灵 - 排成一排的按钮 */}
         {playerState.pets.filter(pet => pet.name !== playerState.active_pet).length > 0 && (
           <>
-            <Divider orientation="left" style={{ fontSize: '13px', margin: '12px 0' }}>替补精灵</Divider>
+            <div style={{ marginBottom: 16, fontSize: '13px', fontWeight: 500, color: 'rgba(0,0,0,0.88)' }}>
+              <Text strong style={{ fontSize: '13px' }}>替补精灵</Text>
+            </div>
             <div style={{ marginBottom: '8px' }}>
               {playerState.pets.filter(pet => pet.name !== playerState.active_pet).map((pet, idx) => {
                 const originalIndex = playerState.pets.findIndex(p => p.name === pet.name);
@@ -648,25 +685,41 @@ const App = () => {
           </>
         )}
 
-        <Divider orientation="left">增益减益</Divider>
-        <Row gutter={[12, 8]}>
+        <div style={{ marginBottom: 16, fontSize: '13px', fontWeight: 500, color: 'rgba(0,0,0,0.88)' }}>
+          <Space>
+            <Text strong style={{ fontSize: '13px' }}>增益减益</Text>
+            <Button 
+              danger 
+              onClick={() => clearAllBuffs(playerKey)}
+            >
+              全部清空
+            </Button>
+          </Space>
+        </div>
+        <Row gutter={[16, 12]}>
           {buffsConfig.map(buffItem => (
             <Col span={12} key={buffItem.key}>
-              <Space>
-                <Text>{buffItem.label}:</Text>
+              <Space align="center">
+                <Text style={{ width: '60px', textAlign: 'right', fontWeight: 500, fontSize: '13px' }}>
+                  {buffItem.label}
+                </Text>
                 <NumberInput 
                   min={buffItem.min}
                   max={buffItem.max}
                   value={playerState.buff[buffItem.key] ?? buffItem.default}
                   onChange={(val) => updateBuff(playerKey, buffItem.key, val)}
-                  width={120}
+                  width={320}
+                  showClear={true}
+                  showStep10={true}
                 />
               </Space>
             </Col>
           ))}
         </Row>
 
-        <Divider orientation="left">行动</Divider>
+        <div style={{ marginBottom: 16, fontSize: '13px', fontWeight: 500, color: 'rgba(0,0,0,0.88)' }}>
+          <Text strong style={{ fontSize: '13px' }}>行动</Text>
+        </div>
         <Space direction="vertical" style={{ width: '100%' }} size="middle">
           <Select 
             placeholder="选择行动类型"
@@ -722,15 +775,15 @@ const App = () => {
         top: 0,
         zIndex: 100
       }}>
-        <Title level={3} style={{ margin: 0, lineHeight: '64px' }}>
-          🎮 洛克王国PVP对局录入工具
+        <Title level={4} style={{ margin: 0, lineHeight: '64px', fontWeight: 600, letterSpacing: '1px' }}>
+          洛克王国PVP对局录入工具
         </Title>
       </Header>
       
       <Content style={{ padding: '24px' }}>
         <Form form={form} layout="vertical">
           <Card 
-            title="📋 基本信息" 
+            title="基本信息" 
             extra={
               <Button type="primary" icon={<DownloadOutlined />} onClick={exportJSON}>
                 导出 JSON
@@ -755,43 +808,63 @@ const App = () => {
             <Row gutter={16}>
               <Col span={12}>
                 <Form.Item label="玩家1 阵容">
-                  <Select 
-                    mode="multiple" 
-                    placeholder="选择最多6只精灵" 
-                    maxCount={6}
-                    value={team1}
-                    onChange={(vals) => handleTeamChange(1, vals)}
-                    showSearch
-                    filterOption={(input, option) =>
-                      option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                    }
-                  >
-                    {pokemonList.map(name => <Option key={name} value={name}>{name}</Option>)}
-                  </Select>
+                  <Space.Compact style={{ width: '100%' }}>
+                    <Select 
+                      mode="multiple" 
+                      placeholder="选择最多6只精灵" 
+                      maxCount={6}
+                      value={team1}
+                      onChange={(vals) => handleTeamChange(1, vals)}
+                      showSearch
+                      filterOption={(input, option) =>
+                        option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                      }
+                      style={{ flex: 1 }}
+                    >
+                      {pokemonList.map(name => <Option key={name} value={name}>{name}</Option>)}
+                    </Select>
+                    <Button 
+                      danger 
+                      onClick={() => handleTeamChange(1, [])}
+                      disabled={team1.length === 0}
+                    >
+                      一键清空
+                    </Button>
+                  </Space.Compact>
                 </Form.Item>
               </Col>
               <Col span={12}>
                 <Form.Item label="玩家2 阵容">
-                  <Select 
-                    mode="multiple" 
-                    placeholder="选择最多6只精灵" 
-                    maxCount={6}
-                    value={team2}
-                    onChange={(vals) => handleTeamChange(2, vals)}
-                    showSearch
-                    filterOption={(input, option) =>
-                      option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                    }
-                  >
-                    {pokemonList.map(name => <Option key={name} value={name}>{name}</Option>)}
-                  </Select>
+                  <Space.Compact style={{ width: '100%' }}>
+                    <Select 
+                      mode="multiple" 
+                      placeholder="选择最多6只精灵" 
+                      maxCount={6}
+                      value={team2}
+                      onChange={(vals) => handleTeamChange(2, vals)}
+                      showSearch
+                      filterOption={(input, option) =>
+                        option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                      }
+                      style={{ flex: 1 }}
+                    >
+                      {pokemonList.map(name => <Option key={name} value={name}>{name}</Option>)}
+                    </Select>
+                    <Button 
+                      danger 
+                      onClick={() => handleTeamChange(2, [])}
+                      disabled={team2.length === 0}
+                    >
+                      一键清空
+                    </Button>
+                  </Space.Compact>
                 </Form.Item>
               </Col>
             </Row>
           </Card>
 
           <Card 
-            title="🎯 回合详情"
+            title="回合详情"
             extra={
               <Space>
                 <Button 
