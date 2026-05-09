@@ -318,6 +318,7 @@ const NumberInput = ({ value, onChange, min = 0, max = 100, step = 1, precision,
 
 const EnergyBlocks = ({ value, onChange, playerNum }) => {
   const [hoverMp, setHoverMp] = useState(null);
+  const [isContainerHovered, setIsContainerHovered] = useState(false);
   const containerRef = React.useRef(null);
   
   const handleMouseMove = (e) => {
@@ -353,62 +354,80 @@ const EnergyBlocks = ({ value, onChange, playerNum }) => {
   };
   
   return (
-    <div 
-      ref={containerRef}
-      style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        padding: '2px 0',
-        width: '240px'
-      }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={() => setHoverMp(null)}
-      onClick={handleClick}
-      onDoubleClick={handleDoubleClick}
-    >
-      {[...Array(10)].map((_, i) => {
-        const isActive = i < value;
-        const isHovered = hoverMp !== null && i <= hoverMp;
-        return (
-          <div
-            key={i}
-            style={{
-              width: '24px',
-              height: '24px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0
-            }}
-          >
-            <Tooltip 
-              title={
-                <div style={{ fontSize: '18px', fontWeight: 'bold', padding: '4px 8px' }}>
-                  {i + 1}
-                </div>
-              } 
-              open={hoverMp === i}
-            >
-              <div
-                style={{
-                  width: '20px',
-                  height: '20px',
-                  border: '1px solid #d9d9d9',
-                  borderRadius: '2px',
-                  cursor: 'pointer',
-                  backgroundColor: isHovered 
-                    ? (playerNum === 1 ? '#91caff' : '#ffd591')
-                    : (isActive 
-                        ? (playerNum === 1 ? '#1890ff' : '#fa8c16') 
-                        : '#fff'),
-                  transition: 'background-color 0.1s'
-                }}
-              />
-            </Tooltip>
+    <Tooltip 
+      title={
+        <div>
+          <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '4px' }}>
+            单击选择能量值
           </div>
-        );
-      })}
-    </div>
+          <div style={{ fontSize: '13px', color: '#8c8c8c' }}>
+            双击可设置能量为零
+          </div>
+        </div>
+      }
+      open={isContainerHovered && hoverMp === null}
+    >
+      <div 
+        ref={containerRef}
+        style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          padding: '2px 0',
+          width: '240px'
+        }}
+        onMouseMove={handleMouseMove}
+        onMouseEnter={() => setIsContainerHovered(true)}
+        onMouseLeave={() => {
+          setIsContainerHovered(false);
+          setHoverMp(null);
+        }}
+        onClick={handleClick}
+        onDoubleClick={handleDoubleClick}
+      >
+        {[...Array(10)].map((_, i) => {
+          const isActive = i < value;
+          const isHovered = hoverMp !== null && i <= hoverMp;
+          return (
+            <div
+              key={i}
+              style={{
+                width: '24px',
+                height: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}
+            >
+              <Tooltip 
+                title={
+                  <div style={{ fontSize: '18px', fontWeight: 'bold', padding: '4px 8px' }}>
+                    {i + 1}
+                  </div>
+                } 
+                open={hoverMp === i}
+              >
+                <div
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    border: '1px solid #d9d9d9',
+                    borderRadius: '2px',
+                    cursor: 'pointer',
+                    backgroundColor: isHovered 
+                      ? (playerNum === 1 ? '#91caff' : '#ffd591')
+                      : (isActive 
+                          ? (playerNum === 1 ? '#1890ff' : '#fa8c16') 
+                          : '#fff'),
+                    transition: 'background-color 0.1s'
+                  }}
+                />
+              </Tooltip>
+            </div>
+          );
+        })}
+      </div>
+    </Tooltip>
   );
 };
 
@@ -480,28 +499,34 @@ const App = () => {
     
     // 确定玩家1的新场上精灵：如果上一回合行动是更换精灵，则使用更换的精灵，否则保持原样
     let player1ActivePet = prevRound.player_1.active_pet;
-    if (prevRound.player_1.action?.type === 'switch' && prevRound.player_1.action.to) {
+    const player1Switched = prevRound.player_1.action?.type === 'switch' && prevRound.player_1.action.to;
+    if (player1Switched) {
       player1ActivePet = prevRound.player_1.action.to;
     }
     
     // 确定玩家2的新场上精灵：如果上一回合行动是更换精灵，则使用更换的精灵，否则保持原样
     let player2ActivePet = prevRound.player_2.active_pet;
-    if (prevRound.player_2.action?.type === 'switch' && prevRound.player_2.action.to) {
+    const player2Switched = prevRound.player_2.action?.type === 'switch' && prevRound.player_2.action.to;
+    if (player2Switched) {
       player2ActivePet = prevRound.player_2.action.to;
     }
+    
+    // 如果切换了精灵，则清空增益减益，否则继承上一回合
+    let player1Buff = player1Switched ? DEFAULT_BUFF() : {...prevRound.player_1.buff};
+    let player2Buff = player2Switched ? DEFAULT_BUFF() : {...prevRound.player_2.buff};
     
     const newRound = {
       cur_round: prevRound.cur_round + 1,
       player_1: {
         active_pet: player1ActivePet,
         pets: prevRound.player_1.pets.map(p => ({...p})),
-        buff: {...prevRound.player_1.buff},
+        buff: player1Buff,
         action: null
       },
       player_2: {
         active_pet: player2ActivePet,
         pets: prevRound.player_2.pets.map(p => ({...p})),
-        buff: {...prevRound.player_2.buff},
+        buff: player2Buff,
         action: null
       }
     };
@@ -535,6 +560,12 @@ const App = () => {
   const updateActivePet = (playerKey, petName) => {
     const newRounds = [...rounds];
     newRounds[currentRoundIndex][playerKey].active_pet = petName;
+    // 切换精灵时清空增益减益
+    const newBuff = {};
+    buffsConfig.forEach(item => {
+      newBuff[item.key] = item.default;
+    });
+    newRounds[currentRoundIndex][playerKey].buff = newBuff;
     setRounds(newRounds);
   };
 

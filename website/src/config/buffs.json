@@ -1,7 +1,7 @@
 [
   {
-    "key": "attack",
-    "label": "物攻",
+    "key": "trait",
+    "label": "特性",
     "min": -100,
     "max": 100,
     "default": 0
