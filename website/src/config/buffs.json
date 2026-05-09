@@ -7,8 +7,8 @@
     "default": 0
   },
   {
-    "key": "sp_attack",
-    "label": "特攻",
+    "key": "attack",
+    "label": "物攻",
     "min": -100,
     "max": 100,
     "default": 0
