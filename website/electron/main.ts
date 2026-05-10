@@ -1,13 +1,10 @@
-import { app, BrowserWindow, Menu, Tray, dialog, ipcMain, nativeImage } from 'electron';
+import { app, BrowserWindow, Menu, dialog, ipcMain } from 'electron';
 import { join } from 'path';
 import { writeFile, readFile, mkdir } from 'fs/promises';
 import { dirname } from 'path';
 import { buildMenuTemplate } from './menu';
 
-const isMac = process.platform === 'darwin';
-
 let mainWindow: BrowserWindow | null = null;
-let tray: Tray | null = null;
 
 // 创建主窗口
 const createMainWindow = () => {
@@ -38,68 +35,10 @@ const createMainWindow = () => {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
   }
 
-  // 窗口关闭时最小化到托盘（非 macOS）
-  mainWindow.on('close', (event) => {
-    if (!isMac && !app.isQuitting) {
-      event.preventDefault();
-      mainWindow?.hide();
-    }
-  });
-
   // 构建原生菜单
   const menuTemplate = buildMenuTemplate(mainWindow);
   const menu = Menu.buildFromTemplate(menuTemplate);
   Menu.setApplicationMenu(menu);
-};
-
-// 创建系统托盘
-const createTray = () => {
-  const iconPath = join(__dirname, '../../resources/icon.png');
-  let trayIcon: Electron.NativeImage;
-  try {
-    trayIcon = nativeImage.createFromPath(iconPath);
-    if (trayIcon.isEmpty()) {
-      trayIcon = nativeImage.createEmpty();
-    }
-  } catch {
-    trayIcon = nativeImage.createEmpty();
-  }
-
-  tray = new Tray(trayIcon);
-  tray.setToolTip('洛克王国PVP对局录入工具');
-
-  const contextMenu = Menu.buildFromTemplate([
-    {
-      label: '显示窗口',
-      click: () => {
-        if (mainWindow) {
-          mainWindow.show();
-          mainWindow.focus();
-        }
-      },
-    },
-    { type: 'separator' },
-    {
-      label: '退出',
-      click: () => {
-        (app as unknown as Record<string, boolean>).isQuitting = true;
-        app.quit();
-      },
-    },
-  ]);
-
-  tray.setContextMenu(contextMenu);
-
-  tray.on('click', () => {
-    if (mainWindow) {
-      if (mainWindow.isVisible()) {
-        mainWindow.hide();
-      } else {
-        mainWindow.show();
-        mainWindow.focus();
-      }
-    }
-  });
 };
 
 // 注册 IPC 通信处理
@@ -168,7 +107,6 @@ const registerIPC = () => {
 app.whenReady().then(() => {
   createMainWindow();
   registerIPC();
-  createTray();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -177,17 +115,4 @@ app.whenReady().then(() => {
       mainWindow?.show();
     }
   });
-});
-
-// 所有窗口关闭时退出（非 macOS）
-app.on('window-all-closed', () => {
-  if (!isMac) {
-    (app as unknown as Record<string, boolean>).isQuitting = true;
-    app.quit();
-  }
-});
-
-// macOS 退出前处理
-app.on('before-quit', () => {
-  (app as unknown as Record<string, boolean>).isQuitting = true;
 });
