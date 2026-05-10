@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { DEFAULT_PET_STATE } from '../constants';
 import { createDefaultBuff, resetBuff } from '../utils/buff';
+import { deepMerge } from '../utils/merge';
 import type { RoundData, Action, OperationResult } from '../types';
 
 // 创建初始回合数据
@@ -21,13 +22,16 @@ const createInitialRound = (team1: string[] = [], team2: string[] = []): RoundDa
 });
 
 // 状态类型
-interface BattleState {
+export interface BattleState {
   winner: number | null;
   team1: string[];
   team2: string[];
   rounds: RoundData[];
   currentRoundIndex: number;
 }
+
+// 状态补丁：所有字段可选，用于识别回填等场景（部分覆盖现有状态）
+export type BattlePatch = Partial<BattleState>;
 
 // 操作类型
 interface BattleActions {
@@ -42,7 +46,8 @@ interface BattleActions {
   updateBuff: (playerKey: string, field: string, value: number) => void;
   clearAllBuffs: (playerKey: string) => void;
   updateAction: (playerKey: string, action: Action) => void;
-  importBattleData: (importedRounds: RoundData[]) => { team1: string[]; team2: string[] };
+  // 通用补丁覆盖：用 Partial<BattleState> 覆盖现有状态
+  patchState: (patch: BattlePatch) => void;
 }
 
 export const useBattleStore = create<BattleState & BattleActions>()((set, get) => ({
@@ -250,19 +255,9 @@ export const useBattleStore = create<BattleState & BattleActions>()((set, get) =
     });
   },
 
-  // 导入对局数据
-  importBattleData: (importedRounds) => {
-    const firstRound = importedRounds[0];
-    const team1 = firstRound.player_1.pets.map((p) => p.name);
-    const team2 = firstRound.player_2.pets.map((p) => p.name);
-
-    set({
-      rounds: importedRounds,
-      currentRoundIndex: 0,
-      team1,
-      team2,
-    });
-
-    return { team1, team2 };
-  },
+  // 通用补丁覆盖：深层合并 patch 到当前状态
+  // 递归到对象和数组内部，只影响 patch 指定的最小字段
+  // 用法示例：patchState({ rounds: [{ player_1: { active_pet: '迪莫' } }] })
+  //          → 只改 rounds[0].player_1.active_pet，其他字段不变
+  patchState: (patch) => set((prev) => deepMerge(prev, patch) as BattleState),
 }));

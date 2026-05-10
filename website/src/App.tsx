@@ -80,15 +80,32 @@ const App: React.FC = () => {
     try {
       const data = result.data as BattleExportData;
 
-      if (!data.winner || !data.round || !data.team_1 || !data.team_2) {
-        message.error('文件格式不正确');
+      // 必填字段校验
+      if (data.winner == null) {
+        message.error('文件缺少胜利方 (winner)');
+        return;
+      }
+      if (!Array.isArray(data.round) || data.round.length === 0) {
+        message.error('文件缺少回合数据 (round)');
+        return;
+      }
+      if (!Array.isArray(data.team_1) || data.team_1.length === 0) {
+        message.error('文件缺少玩家1阵容 (team_1)');
+        return;
+      }
+      if (!Array.isArray(data.team_2) || data.team_2.length === 0) {
+        message.error('文件缺少玩家2阵容 (team_2)');
         return;
       }
 
-      // 回填对局数据
-      const store = useBattleStore.getState();
-      store.setWinner(data.winner);
-      store.importBattleData(data.round as RoundData[]);
+      // 一次 patch 覆盖全部状态
+      useBattleStore.getState().patchState({
+        winner: data.winner,
+        rounds: data.round as RoundData[],
+        team1: data.team_1,
+        team2: data.team_2,
+        currentRoundIndex: 0,
+      });
 
       message.success(`成功导入对局数据！共 ${data.round.length} 回合`);
     } catch {
