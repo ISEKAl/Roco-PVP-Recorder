@@ -3,10 +3,21 @@ import { Card, Row, Col, Typography, Tag, Slider } from 'antd';
 import NumberInput from './NumberInput';
 import EnergyBlocks from './EnergyBlocks';
 import { PLAYER_THEME, HP_SLIDER_CONFIG } from '../constants';
+import type { PetState } from '../types';
 
 const { Text } = Typography;
 
-const PetDetailCard = ({
+interface PetDetailCardProps {
+  pet: PetState;
+  petIndex: number;
+  playerKey: string;
+  playerNum: number;
+  isActive: boolean;
+  onSetActive: (playerKey: string, petName: string) => void;
+  onUpdatePet: (playerKey: string, petIndex: number, field: string, value: number) => void;
+}
+
+const PetDetailCard: React.FC<PetDetailCardProps> = ({
   pet,
   petIndex,
   playerKey,

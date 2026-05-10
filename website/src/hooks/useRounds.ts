@@ -2,9 +2,10 @@ import { useState, useCallback } from 'react';
 import { DEFAULT_PET_STATE } from '../constants';
 import { createDefaultBuff, resetBuff } from '../utils/buff';
 import buffsConfig from '../config/buffs.json';
+import type { RoundData, PetState, Buff, Action, OperationResult, BuffConfigItem } from '../types';
 
 // 创建初始回合数据
-const createInitialRound = (team1 = [], team2 = []) => ({
+const createInitialRound = (team1: string[] = [], team2: string[] = []): RoundData => ({
   cur_round: 1,
   player_1: {
     active_pet: team1.length > 0 ? team1[0] : '',
@@ -20,13 +21,13 @@ const createInitialRound = (team1 = [], team2 = []) => ({
   },
 });
 
-export const useRounds = (initialTeam1 = [], initialTeam2 = []) => {
-  const [rounds, setRounds] = useState([createInitialRound(initialTeam1, initialTeam2)]);
+export const useRounds = () => {
+  const [rounds, setRounds] = useState<RoundData[]>([createInitialRound()]);
   const [currentRoundIndex, setCurrentRoundIndex] = useState(0);
 
   // 同步阵容变化到当前回合
-  const syncTeamToRound = useCallback((playerNum, team) => {
-    const playerKey = `player_${playerNum}`;
+  const syncTeamToRound = useCallback((playerNum: number, team: string[]) => {
+    const playerKey = `player_${playerNum}` as 'player_1' | 'player_2';
 
     setRounds((prevRounds) => {
       const newRounds = [...prevRounds];
@@ -40,7 +41,7 @@ export const useRounds = (initialTeam1 = [], initialTeam2 = []) => {
       } else {
         round[playerKey] = {
           ...round[playerKey],
-          pets: prevRounds[currentRoundIndex - 1][playerKey].pets.map((p) => ({ ...p })),
+          pets: prevRounds[currentRoundIndex - 1][playerKey].pets.map((p: PetState) => ({ ...p })),
         };
       }
 
@@ -61,18 +62,18 @@ export const useRounds = (initialTeam1 = [], initialTeam2 = []) => {
     setRounds((prevRounds) => {
       const prevRound = prevRounds[prevRounds.length - 1];
 
-      const getNextActivePet = (playerKey) => {
-        const switched = prevRound[playerKey].action?.type === 'switch' && prevRound[playerKey].action.to;
-        return switched ? prevRound[playerKey].action.to : prevRound[playerKey].active_pet;
+      const getNextActivePet = (playerKey: 'player_1' | 'player_2'): string => {
+        const switched = prevRound[playerKey].action?.type === 'switch' && prevRound[playerKey].action?.to;
+        return switched ? prevRound[playerKey].action!.to! : prevRound[playerKey].active_pet;
       };
 
       const player1ActivePet = getNextActivePet('player_1');
       const player2ActivePet = getNextActivePet('player_2');
 
-      const player1Switched = prevRound.player_1.action?.type === 'switch' && prevRound.player_1.action.to;
-      const player2Switched = prevRound.player_2.action?.type === 'switch' && prevRound.player_2.action.to;
+      const player1Switched = prevRound.player_1.action?.type === 'switch' && !!prevRound.player_1.action.to;
+      const player2Switched = prevRound.player_2.action?.type === 'switch' && !!prevRound.player_2.action.to;
 
-      const newRound = {
+      const newRound: RoundData = {
         cur_round: prevRound.cur_round + 1,
         player_1: {
           active_pet: player1ActivePet,
@@ -91,22 +92,22 @@ export const useRounds = (initialTeam1 = [], initialTeam2 = []) => {
       return [...prevRounds, newRound];
     });
 
-    setCurrentRoundIndex((prev) => rounds.length);
+    setCurrentRoundIndex(rounds.length); // eslint-disable-line react-hooks/exhaustive-deps
   }, [rounds.length]);
 
   // 删除最后一个回合
-  const deleteRound = useCallback(() => {
+  const deleteRound = useCallback((): OperationResult => {
     if (rounds.length <= 1) {
       return { success: false, message: '至少需要保留1回合' };
     }
 
     setRounds((prevRounds) => prevRounds.slice(0, -1));
-    setCurrentRoundIndex((prev) => rounds.length - 2);
+    setCurrentRoundIndex(rounds.length - 2); // eslint-disable-line react-hooks/exhaustive-deps
     return { success: true, message: `已删除第 ${rounds.length} 回合` };
   }, [rounds.length]);
 
   // 删除全部回合并重置
-  const deleteAllRounds = useCallback(() => {
+  const deleteAllRounds = useCallback((): OperationResult => {
     setRounds((prevRounds) => {
       const firstRound = prevRounds[0];
       return [{
@@ -130,14 +131,15 @@ export const useRounds = (initialTeam1 = [], initialTeam2 = []) => {
   }, []);
 
   // 更新精灵状态
-  const updatePetState = useCallback((playerKey, petIndex, field, value) => {
+  const updatePetState = useCallback((playerKey: string, petIndex: number, field: string, value: number) => {
     setRounds((prevRounds) => {
       const newRounds = [...prevRounds];
       const round = { ...newRounds[currentRoundIndex] };
-      if (round[playerKey].pets[petIndex]) {
-        const pets = [...round[playerKey].pets];
+      const pk = playerKey as 'player_1' | 'player_2';
+      if (round[pk].pets[petIndex]) {
+        const pets = [...round[pk].pets];
         pets[petIndex] = { ...pets[petIndex], [field]: value };
-        round[playerKey] = { ...round[playerKey], pets };
+        round[pk] = { ...round[pk], pets };
         newRounds[currentRoundIndex] = round;
       }
       return newRounds;
@@ -145,12 +147,13 @@ export const useRounds = (initialTeam1 = [], initialTeam2 = []) => {
   }, [currentRoundIndex]);
 
   // 更新场上精灵
-  const updateActivePet = useCallback((playerKey, petName) => {
+  const updateActivePet = useCallback((playerKey: string, petName: string) => {
     setRounds((prevRounds) => {
       const newRounds = [...prevRounds];
       const round = { ...newRounds[currentRoundIndex] };
-      round[playerKey] = {
-        ...round[playerKey],
+      const pk = playerKey as 'player_1' | 'player_2';
+      round[pk] = {
+        ...round[pk],
         active_pet: petName,
         buff: resetBuff(),
       };
@@ -160,13 +163,14 @@ export const useRounds = (initialTeam1 = [], initialTeam2 = []) => {
   }, [currentRoundIndex]);
 
   // 更新增益减益
-  const updateBuff = useCallback((playerKey, field, value) => {
+  const updateBuff = useCallback((playerKey: string, field: string, value: number) => {
     setRounds((prevRounds) => {
       const newRounds = [...prevRounds];
       const round = { ...newRounds[currentRoundIndex] };
-      round[playerKey] = {
-        ...round[playerKey],
-        buff: { ...round[playerKey].buff, [field]: value },
+      const pk = playerKey as 'player_1' | 'player_2';
+      round[pk] = {
+        ...round[pk],
+        buff: { ...round[pk].buff, [field]: value },
       };
       newRounds[currentRoundIndex] = round;
       return newRounds;
@@ -174,12 +178,13 @@ export const useRounds = (initialTeam1 = [], initialTeam2 = []) => {
   }, [currentRoundIndex]);
 
   // 清空所有增益减益
-  const clearAllBuffs = useCallback((playerKey) => {
+  const clearAllBuffs = useCallback((playerKey: string) => {
     setRounds((prevRounds) => {
       const newRounds = [...prevRounds];
       const round = { ...newRounds[currentRoundIndex] };
-      round[playerKey] = {
-        ...round[playerKey],
+      const pk = playerKey as 'player_1' | 'player_2';
+      round[pk] = {
+        ...round[pk],
         buff: resetBuff(),
       };
       newRounds[currentRoundIndex] = round;
@@ -188,11 +193,12 @@ export const useRounds = (initialTeam1 = [], initialTeam2 = []) => {
   }, [currentRoundIndex]);
 
   // 更新行动
-  const updateAction = useCallback((playerKey, action) => {
+  const updateAction = useCallback((playerKey: string, action: Action) => {
     setRounds((prevRounds) => {
       const newRounds = [...prevRounds];
       const round = { ...newRounds[currentRoundIndex] };
-      round[playerKey] = { ...round[playerKey], action };
+      const pk = playerKey as 'player_1' | 'player_2';
+      round[pk] = { ...round[pk], action };
       newRounds[currentRoundIndex] = round;
       return newRounds;
     });

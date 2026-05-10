@@ -3,10 +3,20 @@ import { Button, Card, Row, Col, Typography, Slider } from 'antd';
 import NumberInput from './NumberInput';
 import EnergyBlocks from './EnergyBlocks';
 import { PLAYER_THEME, HP_SLIDER_CONFIG } from '../constants';
+import type { PetState } from '../types';
 
 const { Text } = Typography;
 
-const BenchPetButton = ({
+interface BenchPetButtonProps {
+  pet: PetState;
+  petIndex: number;
+  playerKey: string;
+  playerNum: number;
+  onSetActive: (playerKey: string, petName: string) => void;
+  onUpdatePet: (playerKey: string, petIndex: number, field: string, value: number) => void;
+}
+
+const BenchPetButton: React.FC<BenchPetButtonProps> = ({
   pet,
   petIndex,
   playerKey,
@@ -15,7 +25,7 @@ const BenchPetButton = ({
   onUpdatePet,
 }) => {
   const [showPopup, setShowPopup] = useState(false);
-  const buttonRef = useRef(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
   const theme = PLAYER_THEME[playerNum];
 
   return (

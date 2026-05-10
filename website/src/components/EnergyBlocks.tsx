@@ -2,13 +2,19 @@ import React, { useState, useRef, useCallback } from 'react';
 import { Tooltip } from 'antd';
 import { PLAYER_THEME, ENERGY_BLOCK_COUNT, ENERGY_BLOCK_WIDTH } from '../constants';
 
-const EnergyBlocks = ({ value, onChange, playerNum }) => {
-  const [hoverMp, setHoverMp] = useState(null);
+interface EnergyBlocksProps {
+  value: number;
+  onChange: (value: number) => void;
+  playerNum: number;
+}
+
+const EnergyBlocks: React.FC<EnergyBlocksProps> = ({ value, onChange, playerNum }) => {
+  const [hoverMp, setHoverMp] = useState<number | null>(null);
   const [isContainerHovered, setIsContainerHovered] = useState(false);
-  const containerRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const theme = PLAYER_THEME[playerNum];
 
-  const getBlockIndex = useCallback((clientX) => {
+  const getBlockIndex = useCallback((clientX: number): number => {
     const container = containerRef.current;
     if (!container) return -1;
     const rect = container.getBoundingClientRect();
@@ -19,12 +25,12 @@ const EnergyBlocks = ({ value, onChange, playerNum }) => {
     return -1;
   }, []);
 
-  const handleMouseMove = useCallback((e) => {
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
     const index = getBlockIndex(e.clientX);
     setHoverMp(index >= 0 ? index : null);
   }, [getBlockIndex]);
 
-  const handleClick = useCallback((e) => {
+  const handleClick = useCallback((e: React.MouseEvent) => {
     const index = getBlockIndex(e.clientX);
     if (index >= 0) {
       onChange(index + 1);

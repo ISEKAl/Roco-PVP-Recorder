@@ -6,7 +6,17 @@ import { MAX_TEAM_SIZE } from '../constants';
 const { Text } = Typography;
 const { Option } = Select;
 
-const BasicInfo = ({
+interface BasicInfoProps {
+  winner: number | null;
+  onWinnerChange: (value: number) => void;
+  team1: string[];
+  team2: string[];
+  onTeamChange: (playerNum: number, team: string[]) => void;
+  pokemonList: string[];
+  onExport: () => void;
+}
+
+const BasicInfo: React.FC<BasicInfoProps> = ({
   winner,
   onWinnerChange,
   team1,
@@ -51,7 +61,7 @@ const BasicInfo = ({
                 onChange={(vals) => onTeamChange(1, vals)}
                 showSearch
                 filterOption={(input, option) =>
-                  option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  (option?.children as string)?.toLowerCase().indexOf(input.toLowerCase()) >= 0
                 }
                 style={{ flex: 1 }}
               >
@@ -78,7 +88,7 @@ const BasicInfo = ({
                 onChange={(vals) => onTeamChange(2, vals)}
                 showSearch
                 filterOption={(input, option) =>
-                  option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  (option?.children as string)?.toLowerCase().indexOf(input.toLowerCase()) >= 0
                 }
                 style={{ flex: 1 }}
               >

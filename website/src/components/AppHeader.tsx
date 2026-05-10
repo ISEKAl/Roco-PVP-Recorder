@@ -4,7 +4,7 @@ import { Layout, Typography } from 'antd';
 const { Title } = Typography;
 const { Header } = Layout;
 
-const AppHeader = () => {
+const AppHeader: React.FC = () => {
   return (
     <Header
       style={{

@@ -5,7 +5,7 @@ import { ConfigProvider } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
 import './index.css';
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ConfigProvider
       locale={zhCN}
@@ -16,7 +16,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           fontSize: 14,
           colorText: '#1f1f1f',
           colorTextHeading: '#1a1a1a',
-        }
+        },
       }}
     >
       <App />

@@ -1,5 +1,14 @@
+import type { BattleExportData, ExportResult } from '../types';
+
+interface ExportOptions {
+  winner: number | null;
+  rounds: BattleExportData['round'];
+  team1: string[];
+  team2: string[];
+}
+
 // 导出对局数据为 JSON 文件
-export const exportBattleJSON = (data, options = {}) => {
+export const exportBattleJSON = (data: ExportOptions): ExportResult => {
   const { winner, rounds, team1, team2 } = data;
 
   if (!winner) {
@@ -10,7 +19,7 @@ export const exportBattleJSON = (data, options = {}) => {
     return { success: false, message: '请选择双方阵容' };
   }
 
-  const battleData = {
+  const battleData: BattleExportData = {
     time: new Date().toISOString(),
     winner,
     total_round: rounds.length,

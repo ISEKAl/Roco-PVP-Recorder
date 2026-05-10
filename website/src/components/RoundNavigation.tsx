@@ -7,10 +7,26 @@ import {
   PlusOutlined,
 } from '@ant-design/icons';
 import PlayerPanel from './PlayerPanel';
+import type { RoundData, Action } from '../types';
 
-const { TabPane } = Tabs;
+interface RoundNavigationProps {
+  rounds: RoundData[];
+  currentRoundIndex: number;
+  onNavigate: (index: number) => void;
+  onAddRound: () => void;
+  onDeleteRound: () => void;
+  onDeleteAllRounds: () => void;
+  team1: string[];
+  team2: string[];
+  skillList: string[];
+  onUpdateActivePet: (playerKey: string, petName: string) => void;
+  onUpdatePetState: (playerKey: string, petIndex: number, field: string, value: number) => void;
+  onUpdateBuff: (playerKey: string, field: string, value: number) => void;
+  onClearAllBuffs: (playerKey: string) => void;
+  onUpdateAction: (playerKey: string, action: Action) => void;
+}
 
-const RoundNavigation = ({
+const RoundNavigation: React.FC<RoundNavigationProps> = ({
   rounds,
   currentRoundIndex,
   onNavigate,

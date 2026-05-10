@@ -7,18 +7,18 @@ import { exportBattleJSON } from './utils/export';
 import AppHeader from './components/AppHeader';
 import BasicInfo from './components/BasicInfo';
 import RoundNavigation from './components/RoundNavigation';
+import type { PokemonConfig, SkillConfig } from './types';
 
 const { Content } = Layout;
 
-const App = () => {
+const App: React.FC = () => {
   const [form] = Form.useForm();
-  const [winner, setWinner] = useState(null);
-  const [team1, setTeam1] = useState([]);
-  const [team2, setTeam2] = useState([]);
+  const [winner, setWinner] = useState<number | null>(null);
+  const [team1, setTeam1] = useState<string[]>([]);
+  const [team2, setTeam2] = useState<string[]>([]);
 
   const {
     rounds,
-    currentRound,
     currentRoundIndex,
     setCurrentRoundIndex,
     syncTeamToRound,
@@ -30,13 +30,13 @@ const App = () => {
     updateBuff,
     clearAllBuffs,
     updateAction,
-  } = useRounds(team1, team2);
+  } = useRounds();
 
-  const pokemonList = pokemonData.map((p) => p.name);
-  const skillList = skillsData.map((s) => s.name);
+  const pokemonList = (pokemonData as PokemonConfig[]).map((p) => p.name);
+  const skillList = (skillsData as SkillConfig[]).map((s) => s.name);
 
   // 阵容变更处理
-  const handleTeamChange = useCallback((playerNum, team) => {
+  const handleTeamChange = useCallback((playerNum: number, team: string[]) => {
     if (playerNum === 1) {
       setTeam1(team);
     } else {

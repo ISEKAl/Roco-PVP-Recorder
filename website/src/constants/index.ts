@@ -1,5 +1,7 @@
+import type { PlayerTheme } from '../types';
+
 // 玩家配色主题
-export const PLAYER_THEME = {
+export const PLAYER_THEME: Record<number, PlayerTheme> = {
   1: {
     bgColor: '#e6f7ff',
     borderColor: '#1890ff',
@@ -17,7 +19,7 @@ export const PLAYER_THEME = {
 };
 
 // 精灵默认状态
-export const DEFAULT_PET_STATE = (name) => ({
+export const DEFAULT_PET_STATE = (name: string) => ({
   name,
   hp_ratio: 1,
   mp: 10,

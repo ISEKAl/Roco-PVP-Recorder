@@ -2,7 +2,29 @@ import React from 'react';
 import { Button, InputNumber, Space } from 'antd';
 import { PlusOutlined, MinusOutlined, DoubleLeftOutlined, DoubleRightOutlined } from '@ant-design/icons';
 
-const NumberInput = ({ value, onChange, min = 0, max = 100, step = 1, precision, width = 320, showClear = false, showStep10 = false }) => {
+interface NumberInputProps {
+  value: number;
+  onChange: (value: number) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+  precision?: number;
+  width?: number;
+  showClear?: boolean;
+  showStep10?: boolean;
+}
+
+const NumberInput: React.FC<NumberInputProps> = ({
+  value,
+  onChange,
+  min = 0,
+  max = 100,
+  step = 1,
+  precision,
+  width = 320,
+  showClear = false,
+  showStep10 = false,
+}) => {
   return (
     <Space.Compact style={{ width: width }}>
       {showStep10 && (
@@ -19,7 +41,7 @@ const NumberInput = ({ value, onChange, min = 0, max = 100, step = 1, precision,
       />
       <InputNumber
         value={value}
-        onChange={onChange}
+        onChange={(val) => onChange(val ?? 0)}
         min={min}
         max={max}
         step={step}

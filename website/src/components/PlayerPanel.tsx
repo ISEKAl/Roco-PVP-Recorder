@@ -5,12 +5,24 @@ import BenchPetButton from './BenchPetButton';
 import NumberInput from './NumberInput';
 import { PLAYER_THEME } from '../constants';
 import buffsConfig from '../config/buffs.json';
-import skillsData from '../config/skills.json';
+import type { PlayerRoundState, Action, BuffConfigItem } from '../types';
 
 const { Text } = Typography;
 const { Option } = Select;
 
-const PlayerPanel = ({
+interface PlayerPanelProps {
+  playerNum: number;
+  team: string[];
+  playerState: PlayerRoundState;
+  skillList: string[];
+  onUpdateActivePet: (playerKey: string, petName: string) => void;
+  onUpdatePetState: (playerKey: string, petIndex: number, field: string, value: number) => void;
+  onUpdateBuff: (playerKey: string, field: string, value: number) => void;
+  onClearAllBuffs: (playerKey: string) => void;
+  onUpdateAction: (playerKey: string, action: Action) => void;
+}
+
+const PlayerPanel: React.FC<PlayerPanelProps> = ({
   playerNum,
   team,
   playerState,
@@ -105,7 +117,7 @@ const PlayerPanel = ({
         </Space>
       </div>
       <Row gutter={[16, 12]}>
-        {buffsConfig.map((buffItem) => (
+        {(buffsConfig as BuffConfigItem[]).map((buffItem) => (
           <Col span={12} key={buffItem.key}>
             <Space align="center">
               <Text style={{ width: '60px', textAlign: 'right', fontWeight: 500, fontSize: '13px' }}>
@@ -144,11 +156,11 @@ const PlayerPanel = ({
           <Select
             placeholder="选择技能"
             value={playerState.action.skill_name}
-            onChange={(name) => onUpdateAction(playerKey, { ...playerState.action, skill_name: name })}
+            onChange={(name) => onUpdateAction(playerKey, { ...playerState.action, skill_name: name } as Action)}
             style={{ width: '100%' }}
             showSearch
             filterOption={(input, option) =>
-              option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              (option?.children as string)?.toLowerCase().indexOf(input.toLowerCase()) >= 0
             }
           >
             {skillList.map((name) => <Option key={name} value={name}>{name}</Option>)}
@@ -159,7 +171,7 @@ const PlayerPanel = ({
           <Select
             placeholder="选择目标精灵"
             value={playerState.action.to}
-            onChange={(to) => onUpdateAction(playerKey, { ...playerState.action, to })}
+            onChange={(to) => onUpdateAction(playerKey, { ...playerState.action, to } as Action)}
             style={{ width: '100%' }}
           >
             {team
