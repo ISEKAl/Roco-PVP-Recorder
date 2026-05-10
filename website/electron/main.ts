@@ -9,6 +9,13 @@ let mainWindow: BrowserWindow | null = null;
 
 // 创建主窗口
 const createMainWindow = () => {
+  const isDev = !!process.env.ELECTRON_RENDERER_URL;
+  const preloadPath = join(__dirname, '../preload/preload.mjs');
+
+  console.log('[main] 创建主窗口, __dirname =', __dirname);
+  console.log('[main] preload 路径 =', preloadPath);
+  console.log('[main] 是否为开发模式 =', isDev);
+
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
@@ -17,9 +24,10 @@ const createMainWindow = () => {
     title: '洛克王国PVP对局录入工具',
     icon: join(__dirname, '../../resources/icon.png'),
     webPreferences: {
-      preload: join(__dirname, '../preload/preload.mjs'),
+      preload: preloadPath,
       contextIsolation: true,
       nodeIntegration: false,
+      sandbox: false,
     },
     show: false,
   });
@@ -27,11 +35,16 @@ const createMainWindow = () => {
   // 窗口准备好后再显示，避免白屏
   mainWindow.once('ready-to-show', () => {
     mainWindow?.show();
+    // 开发模式下自动打开 DevTools，方便排查问题
+    if (isDev) {
+      mainWindow?.webContents.openDevTools();
+      console.log('[main] DevTools 已打开');
+    }
   });
 
   // 加载渲染进程
-  if (process.env.ELECTRON_RENDERER_URL) {
-    mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL);
+  if (isDev) {
+    mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL!);
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
   }
