@@ -9,9 +9,11 @@ import type { BattlePatch } from '../../src/stores/battleStore';
 
 let initialized = false;
 
-// 动态加载 @maaxyz/maa-node（原生 C++ 模块，不可在顶层 import）
-async function loadMaa() {
-  return await import('@maaxyz/maa-node');
+// 动态加载 @maaxyz/maa-node（原生 C++ 模块）
+// 注意：maa-node 是 CJS 模块，ESM 动态 import 会将其 exports 包裹在 default 中
+async function loadMaa(): Promise<typeof maa> {
+  const mod = await import('@maaxyz/maa-node') as { default: typeof maa };
+  return mod.default;
 }
 
 async function initMaa(): Promise<void> {
