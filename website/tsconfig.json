@@ -22,8 +22,5 @@
     }
   },
   "include": ["src", "vite-env.d.ts"],
-  "references": [
-    { "path": "./tsconfig.node.json" },
-    { "path": "./tsconfig.web.json" }
-  ]
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

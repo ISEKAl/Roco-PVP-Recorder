@@ -1,9 +1,8 @@
 import React from 'react';
-import { Card, Form, Row, Col, Select, Button, Typography, Space } from 'antd';
+import { Card, Form, Row, Col, Select, Button, Space } from 'antd';
 import { DownloadOutlined } from '@ant-design/icons';
 import { MAX_TEAM_SIZE } from '../constants';
 
-const { Text } = Typography;
 const { Option } = Select;
 
 interface BasicInfoProps {
@@ -60,9 +59,11 @@ const BasicInfo: React.FC<BasicInfoProps> = ({
                 value={team1}
                 onChange={(vals) => onTeamChange(1, vals)}
                 showSearch
-                filterOption={(input, option) =>
-                  (option?.children as string)?.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                }
+                filterOption={(input, option) => {
+                  const label = option?.children;
+                  if (typeof label !== 'string') return false;
+                  return String(label).toLowerCase().indexOf(input.toLowerCase()) >= 0;
+                }}
                 style={{ flex: 1 }}
               >
                 {pokemonList.map((name) => <Option key={name} value={name}>{name}</Option>)}
@@ -87,9 +88,11 @@ const BasicInfo: React.FC<BasicInfoProps> = ({
                 value={team2}
                 onChange={(vals) => onTeamChange(2, vals)}
                 showSearch
-                filterOption={(input, option) =>
-                  (option?.children as string)?.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                }
+                filterOption={(input, option) => {
+                  const label = option?.children;
+                  if (typeof label !== 'string') return false;
+                  return String(label).toLowerCase().indexOf(input.toLowerCase()) >= 0;
+                }}
                 style={{ flex: 1 }}
               >
                 {pokemonList.map((name) => <Option key={name} value={name}>{name}</Option>)}

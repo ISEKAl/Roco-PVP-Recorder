@@ -159,9 +159,11 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
             onChange={(name) => onUpdateAction(playerKey, { ...playerState.action, skill_name: name } as Action)}
             style={{ width: '100%' }}
             showSearch
-            filterOption={(input, option) =>
-              (option?.children as string)?.toLowerCase().indexOf(input.toLowerCase()) >= 0
-            }
+            filterOption={(input, option) => {
+              const label = option?.children;
+              if (typeof label !== 'string') return false;
+              return String(label).toLowerCase().indexOf(input.toLowerCase()) >= 0;
+            }}
           >
             {skillList.map((name) => <Option key={name} value={name}>{name}</Option>)}
           </Select>
