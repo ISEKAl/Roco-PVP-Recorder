@@ -3,6 +3,7 @@ import { join } from 'path';
 import { writeFile, readFile, mkdir } from 'fs/promises';
 import { dirname } from 'path';
 import { buildMenuTemplate } from './menu';
+import { recognizeTeamBattle } from './maa/recognizer';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -100,6 +101,36 @@ const registerIPC = () => {
   // 获取应用版本
   ipcMain.handle('get-app-version', () => {
     return app.getVersion();
+  });
+
+  // 识别双方阵容
+  ipcMain.handle('recognize-teams', async () => {
+    try {
+      return await recognizeTeamBattle();
+    } catch (error) {
+      return {
+        success: false,
+        message: `识别异常: ${(error as Error).message}`,
+        patch: {},
+      };
+    }
+  });
+
+  // 悬浮球位置持久化
+  const BALL_POSITION_FILE = 'toolball-position.json';
+  ipcMain.handle('save-ball-position', async (_e, pos: { x: number; y: number }) => {
+    const dir = app.getPath('userData');
+    await mkdir(dir, { recursive: true });
+    await writeFile(join(dir, BALL_POSITION_FILE), JSON.stringify(pos), 'utf-8');
+  });
+
+  ipcMain.handle('load-ball-position', async () => {
+    try {
+      const raw = await readFile(join(app.getPath('userData'), BALL_POSITION_FILE), 'utf-8');
+      return JSON.parse(raw) as { x: number; y: number };
+    } catch {
+      return null;
+    }
   });
 };
 

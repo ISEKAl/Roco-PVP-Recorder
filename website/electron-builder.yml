@@ -8,8 +8,15 @@ directories:
 
 files:
   - dist/**/*
-  - !node_modules
+  - "!node_modules"
   - package.json
+
+asarUnpack:
+  - "node_modules/@maaxyz/maa-node/**/*"
+
+extraResources:
+  - from: "resources/templates"
+    to: "templates"
 
 win:
   target:

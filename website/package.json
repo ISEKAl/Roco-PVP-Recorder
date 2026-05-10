@@ -10,10 +10,12 @@
     "pack": "electron-vite build && electron-builder --dir",
     "dist:win": "electron-vite build && electron-builder --win",
     "dist:mac": "electron-vite build && electron-builder --mac",
-    "dist": "electron-vite build && electron-builder --win --mac"
+    "dist": "electron-vite build && electron-builder --win --mac",
+    "download-templates": "node scripts/download-templates.mjs"
   },
   "dependencies": {
     "@ant-design/icons": "^5.2.6",
+    "@maaxyz/maa-node": "^5.10.4",
     "antd": "^5.12.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

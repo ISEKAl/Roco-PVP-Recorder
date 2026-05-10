@@ -39,3 +39,5 @@ yarn-error.log*
 *.tmp
 *.temp
 *.bak
+
+.builder-cache/

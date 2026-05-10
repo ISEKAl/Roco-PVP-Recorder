@@ -7,6 +7,7 @@ import { exportBattleJSON } from './utils/export';
 import AppHeader from './components/AppHeader';
 import BasicInfo from './components/BasicInfo';
 import RoundNavigation from './components/RoundNavigation';
+import ToolBall from './components/ToolBall';
 import type { PokemonConfig, SkillConfig, RoundData, BattleExportData } from './types';
 
 const { Content } = Layout;
@@ -153,6 +154,7 @@ const App: React.FC = () => {
           />
         </Form>
       </Content>
+      <ToolBall />
     </Layout>
   );
 };
