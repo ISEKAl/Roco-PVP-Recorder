@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Layout, Form, message } from 'antd';
 import pokemonData from './config/pokemon.json';
 import skillsData from './config/skills.json';
@@ -7,7 +7,7 @@ import { exportBattleJSON } from './utils/export';
 import AppHeader from './components/AppHeader';
 import BasicInfo from './components/BasicInfo';
 import RoundNavigation from './components/RoundNavigation';
-import type { PokemonConfig, SkillConfig } from './types';
+import type { PokemonConfig, SkillConfig, RoundData, BattleExportData } from './types';
 
 const { Content } = Layout;
 
@@ -30,6 +30,7 @@ const App: React.FC = () => {
     updateBuff,
     clearAllBuffs,
     updateAction,
+    importBattleData,
   } = useRounds();
 
   const pokemonList = (pokemonData as PokemonConfig[]).map((p) => p.name);
@@ -68,14 +69,74 @@ const App: React.FC = () => {
   }, [deleteAllRounds]);
 
   // 导出 JSON
-  const handleExport = useCallback(() => {
-    const result = exportBattleJSON({ winner, rounds, team1, team2 });
+  const handleExport = useCallback(async () => {
+    const result = await exportBattleJSON({ winner, rounds, team1, team2 });
     if (result.success) {
       message.success(result.message);
     } else {
       message.error(result.message);
     }
   }, [winner, rounds, team1, team2]);
+
+  // 导入 JSON
+  const handleImport = useCallback(async () => {
+    if (!window.electronAPI) {
+      message.warning('导入功能仅在桌面应用中可用');
+      return;
+    }
+
+    const result = await window.electronAPI.openFile();
+    if (!result.success || !result.data) {
+      if (result.message && result.message !== '用户取消导入') {
+        message.error(result.message || '导入失败');
+      }
+      return;
+    }
+
+    try {
+      const data = result.data as BattleExportData;
+
+      if (!data.winner || !data.round || !data.team_1 || !data.team_2) {
+        message.error('文件格式不正确');
+        return;
+      }
+
+      // 回填对局数据
+      setWinner(data.winner);
+      setTeam1(data.team_1);
+      setTeam2(data.team_2);
+
+      const teams = importBattleData(data.round as RoundData[]);
+      // importBattleData 内部已设置 rounds，这里同步 teams
+      setTeam1(teams.team1);
+      setTeam2(teams.team2);
+
+      message.success(`成功导入对局数据！共 ${data.round.length} 回合`);
+    } catch {
+      message.error('文件解析失败，请检查文件格式');
+    }
+  }, [importBattleData]);
+
+  // 监听原生菜单事件
+  useEffect(() => {
+    if (!window.electronAPI) return;
+
+    const unsubscribe = window.electronAPI.onMenuAction((action: string) => {
+      switch (action) {
+        case 'export':
+          handleExport();
+          break;
+        case 'import':
+          handleImport();
+          break;
+        case 'about':
+          message.info('洛克王国PVP对局录入工具 v1.0.0');
+          break;
+      }
+    });
+
+    return unsubscribe;
+  }, [handleExport, handleImport]);
 
   return (
     <Layout style={{ minHeight: '100vh', background: '#f0f2f5' }}>

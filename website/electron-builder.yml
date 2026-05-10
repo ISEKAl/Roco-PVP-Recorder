@@ -1,0 +1,44 @@
+appId: com.rocopvp.battle-recorder
+productName: 洛克王国PVP对局录入工具
+copyright: Copyright © 2024
+
+directories:
+  output: release
+  buildResources: resources
+
+files:
+  - dist/**/*
+  - !node_modules
+  - package.json
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  artifactName: ${productName}-Setup-${version}-${arch}.${ext}
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: 洛克王国PVP对局录入工具
+
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+  artifactName: ${productName}-${version}-${arch}.${ext}
+  category: public.app-category.utilities
+
+dmg:
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications

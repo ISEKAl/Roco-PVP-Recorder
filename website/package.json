@@ -1,12 +1,16 @@
 {
   "name": "roco-pvp-input",
   "version": "1.0.0",
+  "main": "./dist/main/main.js",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "deploy": "npm run build && gh-pages -d dist"
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "pack": "electron-vite build && electron-builder --dir",
+    "dist:win": "electron-vite build && electron-builder --win",
+    "dist:mac": "electron-vite build && electron-builder --mac",
+    "dist": "electron-vite build && electron-builder --win --mac"
   },
   "dependencies": {
     "@ant-design/icons": "^5.2.6",
@@ -15,9 +19,13 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@types/node": "^25.6.2",
     "@types/react": "^18.3.28",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^4.2.1",
+    "electron": "^42.0.1",
+    "electron-builder": "^26.8.1",
+    "electron-vite": "^5.0.0",
     "gh-pages": "^6.3.0",
     "typescript": "^6.0.3",
     "vite": "^5.0.8"

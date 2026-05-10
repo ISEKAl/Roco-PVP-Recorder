@@ -6,6 +6,7 @@ __pycache__/
 
 # Build outputs
 website/dist/
+website/release/
 website/build/
 .vite/
 

@@ -7,19 +7,14 @@ interface ExportOptions {
   team2: string[];
 }
 
-// 导出对局数据为 JSON 文件
-export const exportBattleJSON = (data: ExportOptions): ExportResult => {
+// 构建对局导出数据
+const buildBattleData = (data: ExportOptions): BattleExportData | null => {
   const { winner, rounds, team1, team2 } = data;
 
-  if (!winner) {
-    return { success: false, message: '请选择胜利方' };
-  }
+  if (!winner) return null;
+  if (team1.length === 0 || team2.length === 0) return null;
 
-  if (team1.length === 0 || team2.length === 0) {
-    return { success: false, message: '请选择双方阵容' };
-  }
-
-  const battleData: BattleExportData = {
+  return {
     time: new Date().toISOString(),
     winner,
     total_round: rounds.length,
@@ -31,10 +26,11 @@ export const exportBattleJSON = (data: ExportOptions): ExportResult => {
       player_2: r.player_2,
     })),
   };
+};
 
-  const blob = new Blob([JSON.stringify(battleData, null, 4)], {
-    type: 'application/json',
-  });
+// 浏览器环境下载 JSON
+const downloadInBrowser = (jsonString: string): void => {
+  const blob = new Blob([jsonString], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -52,6 +48,37 @@ export const exportBattleJSON = (data: ExportOptions): ExportResult => {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+};
 
+// 异步导出对局数据（Electron 原生保存对话框 / 浏览器下载）
+export const exportBattleJSON = async (data: ExportOptions): Promise<ExportResult> => {
+  const { winner, team1, team2 } = data;
+
+  if (!winner) {
+    return { success: false, message: '请选择胜利方' };
+  }
+
+  if (team1.length === 0 || team2.length === 0) {
+    return { success: false, message: '请选择双方阵容' };
+  }
+
+  const battleData = buildBattleData(data);
+  if (!battleData) {
+    return { success: false, message: '数据构建失败' };
+  }
+
+  const jsonString = JSON.stringify(battleData, null, 4);
+
+  // Electron 环境：使用原生保存对话框
+  if (window.electronAPI) {
+    const result = await window.electronAPI.saveFile(jsonString);
+    if (result.success) {
+      return { success: true, message: '对局数据导出成功！' };
+    }
+    return { success: false, message: result.message };
+  }
+
+  // 浏览器环境：触发下载
+  downloadInBrowser(jsonString);
   return { success: true, message: '对局数据导出成功！' };
 };

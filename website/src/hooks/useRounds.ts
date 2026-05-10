@@ -206,6 +206,17 @@ export const useRounds = () => {
 
   const currentRound = rounds[currentRoundIndex];
 
+  // 导入对局数据
+  const importBattleData = useCallback((importedRounds: RoundData[]): { team1: string[], team2: string[] } => {
+    setRounds(importedRounds);
+    setCurrentRoundIndex(0);
+    const firstRound = importedRounds[0];
+    return {
+      team1: firstRound.player_1.pets.map((p) => p.name),
+      team2: firstRound.player_2.pets.map((p) => p.name),
+    };
+  }, []);
+
   return {
     rounds,
     currentRound,
@@ -220,5 +231,6 @@ export const useRounds = () => {
     updateBuff,
     clearAllBuffs,
     updateAction,
+    importBattleData,
   };
 };
