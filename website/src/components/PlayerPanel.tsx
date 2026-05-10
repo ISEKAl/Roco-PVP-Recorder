@@ -5,36 +5,33 @@ import BenchPetButton from './BenchPetButton';
 import NumberInput from './NumberInput';
 import { PLAYER_THEME } from '../constants';
 import buffsConfig from '../config/buffs.json';
-import type { PlayerRoundState, Action, BuffConfigItem } from '../types';
+import { useBattleStore } from '../stores/battleStore';
+import type { Action, BuffConfigItem } from '../types';
 
 const { Text } = Typography;
 const { Option } = Select;
 
 interface PlayerPanelProps {
   playerNum: number;
-  team: string[];
-  playerState: PlayerRoundState;
   skillList: string[];
-  onUpdateActivePet: (playerKey: string, petName: string) => void;
-  onUpdatePetState: (playerKey: string, petIndex: number, field: string, value: number) => void;
-  onUpdateBuff: (playerKey: string, field: string, value: number) => void;
-  onClearAllBuffs: (playerKey: string) => void;
-  onUpdateAction: (playerKey: string, action: Action) => void;
 }
 
 const PlayerPanel: React.FC<PlayerPanelProps> = ({
   playerNum,
-  team,
-  playerState,
   skillList,
-  onUpdateActivePet,
-  onUpdatePetState,
-  onUpdateBuff,
-  onClearAllBuffs,
-  onUpdateAction,
 }) => {
   const playerKey = `player_${playerNum}`;
   const theme = PLAYER_THEME[playerNum];
+
+  const team = useBattleStore((s) => playerNum === 1 ? s.team1 : s.team2);
+  const playerState = useBattleStore(
+    (s) => s.rounds[s.currentRoundIndex][playerKey as 'player_1' | 'player_2']
+  );
+  const updateActivePet = useBattleStore((s) => s.updateActivePet);
+  const updatePetState = useBattleStore((s) => s.updatePetState);
+  const updateBuff = useBattleStore((s) => s.updateBuff);
+  const clearAllBuffs = useBattleStore((s) => s.clearAllBuffs);
+  const updateAction = useBattleStore((s) => s.updateAction);
 
   return (
     <Card
@@ -49,7 +46,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
       <Form.Item label={<Text strong style={{ fontSize: '13px' }}>场上精灵</Text>} style={{ marginBottom: 12 }}>
         <Select
           value={playerState.active_pet}
-          onChange={(val) => onUpdateActivePet(playerKey, val)}
+          onChange={(val) => updateActivePet(playerKey, val)}
           style={{ width: '100%' }}
         >
           {team.map((name) => <Option key={name} value={name}>{name}</Option>)}
@@ -74,8 +71,8 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
               playerKey={playerKey}
               playerNum={playerNum}
               isActive={true}
-              onSetActive={onUpdateActivePet}
-              onUpdatePet={onUpdatePetState}
+              onSetActive={updateActivePet}
+              onUpdatePet={updatePetState}
             />
           );
         })}
@@ -98,8 +95,8 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
                     petIndex={originalIndex}
                     playerKey={playerKey}
                     playerNum={playerNum}
-                    onSetActive={onUpdateActivePet}
-                    onUpdatePet={onUpdatePetState}
+                    onSetActive={updateActivePet}
+                    onUpdatePet={updatePetState}
                   />
                 );
               })}
@@ -111,7 +108,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
       <div style={{ marginBottom: 16, fontSize: '13px', fontWeight: 500, color: 'rgba(0,0,0,0.88)' }}>
         <Space>
           <Text strong style={{ fontSize: '13px' }}>增益减益</Text>
-          <Button danger onClick={() => onClearAllBuffs(playerKey)}>
+          <Button danger onClick={() => clearAllBuffs(playerKey)}>
             全部清空
           </Button>
         </Space>
@@ -127,7 +124,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
                 min={buffItem.min}
                 max={buffItem.max}
                 value={playerState.buff[buffItem.key] ?? buffItem.default}
-                onChange={(val) => onUpdateBuff(playerKey, buffItem.key, val)}
+                onChange={(val) => updateBuff(playerKey, buffItem.key, val)}
                 width={320}
                 showClear={true}
                 showStep10={true}
@@ -145,7 +142,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
         <Select
           placeholder="选择行动类型"
           value={playerState.action?.type}
-          onChange={(type) => onUpdateAction(playerKey, { type, skill_name: null, to: null })}
+          onChange={(type) => updateAction(playerKey, { type, skill_name: null, to: null })}
           style={{ width: '100%' }}
         >
           <Option value="skill">使用技能</Option>
@@ -156,7 +153,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
           <Select
             placeholder="选择技能"
             value={playerState.action.skill_name}
-            onChange={(name) => onUpdateAction(playerKey, { ...playerState.action, skill_name: name } as Action)}
+            onChange={(name) => updateAction(playerKey, { ...playerState.action, skill_name: name } as Action)}
             style={{ width: '100%' }}
             showSearch
             filterOption={(input, option) => {
@@ -173,7 +170,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
           <Select
             placeholder="选择目标精灵"
             value={playerState.action.to}
-            onChange={(to) => onUpdateAction(playerKey, { ...playerState.action, to } as Action)}
+            onChange={(to) => updateAction(playerKey, { ...playerState.action, to } as Action)}
             style={{ width: '100%' }}
           >
             {team

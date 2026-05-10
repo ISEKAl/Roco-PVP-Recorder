@@ -7,41 +7,25 @@ import {
   PlusOutlined,
 } from '@ant-design/icons';
 import PlayerPanel from './PlayerPanel';
-import type { RoundData, Action } from '../types';
+import { useBattleStore } from '../stores/battleStore';
 
 interface RoundNavigationProps {
-  rounds: RoundData[];
-  currentRoundIndex: number;
-  onNavigate: (index: number) => void;
+  skillList: string[];
   onAddRound: () => void;
   onDeleteRound: () => void;
   onDeleteAllRounds: () => void;
-  team1: string[];
-  team2: string[];
-  skillList: string[];
-  onUpdateActivePet: (playerKey: string, petName: string) => void;
-  onUpdatePetState: (playerKey: string, petIndex: number, field: string, value: number) => void;
-  onUpdateBuff: (playerKey: string, field: string, value: number) => void;
-  onClearAllBuffs: (playerKey: string) => void;
-  onUpdateAction: (playerKey: string, action: Action) => void;
 }
 
 const RoundNavigation: React.FC<RoundNavigationProps> = ({
-  rounds,
-  currentRoundIndex,
-  onNavigate,
+  skillList,
   onAddRound,
   onDeleteRound,
   onDeleteAllRounds,
-  team1,
-  team2,
-  skillList,
-  onUpdateActivePet,
-  onUpdatePetState,
-  onUpdateBuff,
-  onClearAllBuffs,
-  onUpdateAction,
 }) => {
+  const rounds = useBattleStore((s) => s.rounds);
+  const currentRoundIndex = useBattleStore((s) => s.currentRoundIndex);
+  const navigateRound = useBattleStore((s) => s.navigateRound);
+
   return (
     <Card
       title="回合详情"
@@ -50,14 +34,14 @@ const RoundNavigation: React.FC<RoundNavigationProps> = ({
           <Button
             icon={<ArrowLeftOutlined />}
             disabled={currentRoundIndex === 0}
-            onClick={() => onNavigate(currentRoundIndex - 1)}
+            onClick={() => navigateRound(currentRoundIndex - 1)}
           >
             上一回合
           </Button>
           <Button
             icon={<ArrowRightOutlined />}
             disabled={currentRoundIndex === rounds.length - 1}
-            onClick={() => onNavigate(currentRoundIndex + 1)}
+            onClick={() => navigateRound(currentRoundIndex + 1)}
           >
             下一回合
           </Button>
@@ -83,7 +67,7 @@ const RoundNavigation: React.FC<RoundNavigationProps> = ({
     >
       <Tabs
         activeKey={String(currentRoundIndex)}
-        onChange={(key) => onNavigate(Number(key))}
+        onChange={(key) => navigateRound(Number(key))}
         type="card"
         size="small"
         items={rounds.map((round, idx) => ({
@@ -96,27 +80,13 @@ const RoundNavigation: React.FC<RoundNavigationProps> = ({
         <Col span={12}>
           <PlayerPanel
             playerNum={1}
-            team={team1}
-            playerState={rounds[currentRoundIndex].player_1}
             skillList={skillList}
-            onUpdateActivePet={onUpdateActivePet}
-            onUpdatePetState={onUpdatePetState}
-            onUpdateBuff={onUpdateBuff}
-            onClearAllBuffs={onClearAllBuffs}
-            onUpdateAction={onUpdateAction}
           />
         </Col>
         <Col span={12}>
           <PlayerPanel
             playerNum={2}
-            team={team2}
-            playerState={rounds[currentRoundIndex].player_2}
             skillList={skillList}
-            onUpdateActivePet={onUpdateActivePet}
-            onUpdatePetState={onUpdatePetState}
-            onUpdateBuff={onUpdateBuff}
-            onClearAllBuffs={onClearAllBuffs}
-            onUpdateAction={onUpdateAction}
           />
         </Col>
       </Row>

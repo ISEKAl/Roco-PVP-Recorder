@@ -2,28 +2,25 @@ import React from 'react';
 import { Card, Form, Row, Col, Select, Button, Space } from 'antd';
 import { DownloadOutlined } from '@ant-design/icons';
 import { MAX_TEAM_SIZE } from '../constants';
+import { useBattleStore } from '../stores/battleStore';
 
 const { Option } = Select;
 
 interface BasicInfoProps {
-  winner: number | null;
-  onWinnerChange: (value: number) => void;
-  team1: string[];
-  team2: string[];
-  onTeamChange: (playerNum: number, team: string[]) => void;
   pokemonList: string[];
   onExport: () => void;
 }
 
 const BasicInfo: React.FC<BasicInfoProps> = ({
-  winner,
-  onWinnerChange,
-  team1,
-  team2,
-  onTeamChange,
   pokemonList,
   onExport,
 }) => {
+  const winner = useBattleStore((s) => s.winner);
+  const team1 = useBattleStore((s) => s.team1);
+  const team2 = useBattleStore((s) => s.team2);
+  const setWinner = useBattleStore((s) => s.setWinner);
+  const setTeam = useBattleStore((s) => s.setTeam);
+
   return (
     <Card
       title="基本信息"
@@ -39,7 +36,7 @@ const BasicInfo: React.FC<BasicInfoProps> = ({
           <Form.Item label="胜利方">
             <Select
               value={winner}
-              onChange={onWinnerChange}
+              onChange={setWinner}
               placeholder="请选择胜利方"
             >
               <Option value={1}>玩家 1 胜</Option>
@@ -57,7 +54,7 @@ const BasicInfo: React.FC<BasicInfoProps> = ({
                 placeholder="选择最多6只精灵"
                 maxCount={MAX_TEAM_SIZE}
                 value={team1}
-                onChange={(vals) => onTeamChange(1, vals)}
+                onChange={(vals) => setTeam(1, vals)}
                 showSearch
                 filterOption={(input, option) => {
                   const label = option?.children;
@@ -70,7 +67,7 @@ const BasicInfo: React.FC<BasicInfoProps> = ({
               </Select>
               <Button
                 danger
-                onClick={() => onTeamChange(1, [])}
+                onClick={() => setTeam(1, [])}
                 disabled={team1.length === 0}
               >
                 一键清空
@@ -86,7 +83,7 @@ const BasicInfo: React.FC<BasicInfoProps> = ({
                 placeholder="选择最多6只精灵"
                 maxCount={MAX_TEAM_SIZE}
                 value={team2}
-                onChange={(vals) => onTeamChange(2, vals)}
+                onChange={(vals) => setTeam(2, vals)}
                 showSearch
                 filterOption={(input, option) => {
                   const label = option?.children;
@@ -99,7 +96,7 @@ const BasicInfo: React.FC<BasicInfoProps> = ({
               </Select>
               <Button
                 danger
-                onClick={() => onTeamChange(2, [])}
+                onClick={() => setTeam(2, [])}
                 disabled={team2.length === 0}
               >
                 一键清空

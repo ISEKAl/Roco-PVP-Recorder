@@ -1,6 +1,7 @@
 import { app, BrowserWindow, Menu, Tray, dialog, ipcMain, nativeImage } from 'electron';
 import { join } from 'path';
-import { writeFile, readFile } from 'fs/promises';
+import { writeFile, readFile, mkdir } from 'fs/promises';
+import { dirname } from 'path';
 import { buildMenuTemplate } from './menu';
 
 const isMac = process.platform === 'darwin';
@@ -118,10 +119,19 @@ const registerIPC = () => {
     }
 
     try {
+      // 确保目标目录存在，避免因目录不存在导致的写入失败
+      const dir = dirname(result.filePath);
+      await mkdir(dir, { recursive: true });
       await writeFile(result.filePath, data, 'utf-8');
       return { success: true, message: '保存成功' };
     } catch (error) {
-      return { success: false, message: `保存失败: ${(error as Error).message}` };
+      const err = error as NodeJS.ErrnoException;
+      let message = `保存失败: ${err.message}`;
+      // 权限不足时给出更明确的提示
+      if (err.code === 'EACCES' || err.code === 'EPERM') {
+        message = `保存失败: 没有权限写入该目录，请选择其他位置（如桌面或文档文件夹）`;
+      }
+      return { success: false, message };
     }
   });
 
